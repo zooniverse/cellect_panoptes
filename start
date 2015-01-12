@@ -1,0 +1,36 @@
+#!/usr/bin/env ruby
+
+# -*- mode: ruby; -*-
+
+require 'yaml'
+
+environment = ENV['ENVIRONMENT']
+if environment == nil
+  environment = 'production'
+end
+
+begin
+  databases = YAML.load(File.read("/production_config/database.yml"))
+  db = databases[environment]
+  PG_HOST = db['host']
+  PG_PORT = db['port']
+  PG_DB = db['database']
+  PG_USER = db['user']
+  PG_PASS = db['password']
+rescue Errno::ENOENT
+  PG_HOST = ENV['PG_PORT_5432_TCP_ADDR']
+  PG_PORT = ENV['PG_PORT_5432_TCP_PORT']
+  PG_DB = ENV['PG_ENV_DB']
+  PG_USER = ENV['PG_ENV_PG_USER']
+  PG_PASS = ENV['PG_ENV_PASS']
+end
+
+begin
+  zookeepers = YAML.load(File.read("/production_config/zookeeper.yml"))
+  zk = databases[environment]
+  ZK_URL = "#{zk['host']}:#{zk['port']}"
+rescue Errno::ENOENT
+  ZK_URL = "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
+end
+
+exit system("ZK_URL=#{ZK_URL} PG_HOST=#{PG_HOST} PG_PORT=#{PG_PORT} PG_DB=#{PG_DB} PG_USER=#{PG_USER} PG_PASS=#{PG_PASS} puma")
