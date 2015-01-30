@@ -1,5 +1,6 @@
 require 'cellect/server'
-require 'cellect/server/adapters/postgres'
-Cellect::Server.adapter = Cellect::Server::Adapters::Postgres.new
+require_relative 'lib/cellect/server/adapters/panoptes'
+
+Cellect::Server.adapter = Cellect::Server::Adapters::Panoptes.new
 
 run Cellect::Server::API
