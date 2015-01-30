@@ -27,7 +27,7 @@ end
 
 begin
   zookeepers = YAML.load(File.read("/production_config/zookeeper.yml"))
-  zk = databases[environment]
+  zk = zookeepers[environment]
   ZK_URL = "#{zk['host']}:#{zk['port']}"
 rescue Errno::ENOENT
   ZK_URL = "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
