@@ -35,4 +35,6 @@ rescue Errno::ENOENT
   ZK_URL = "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
 end
 
-exit system("ZK_URL=#{ZK_URL} PG_POOL_SIZE=#{PG_POOL_SIZE} PG_HOST=#{PG_HOST} PG_PORT=#{PG_PORT} PG_DB=#{PG_DB} PG_USER=#{PG_USER} PG_PASS=#{PG_PASS} puma")
+puma_cmd = "puma -b tcp://0.0.0.0:80 -t 8:64"
+
+exit system("ZK_URL=#{ZK_URL} PG_POOL_SIZE=#{PG_POOL_SIZE} PG_HOST=#{PG_HOST} PG_PORT=#{PG_PORT} PG_DB=#{PG_DB} PG_USER=#{PG_USER} PG_PASS=#{PG_PASS} #{puma_cmd}")
