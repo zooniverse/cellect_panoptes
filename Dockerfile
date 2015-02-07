@@ -19,4 +19,6 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     chmod +x /cellect_panoptes/start
 
+EXPOSE 80
+
 ENTRYPOINT /cellect_panoptes/start
