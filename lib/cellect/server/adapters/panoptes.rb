@@ -13,7 +13,7 @@ module Cellect
 
         def workflow_list(*names)
           with_pg do |pg|
-            statement = 'SELECT * FROM workflows'
+            statement = 'SELECT * FROM workflows '
             statement += case names.length
                          when 0
                            ""
