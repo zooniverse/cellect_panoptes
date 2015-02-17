@@ -7,11 +7,11 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
     described_class.new
   end
 
-  let(:workflow_class) { Cellect::Server::Adapters::Workflow }
-  let(:set_class) { Cellect::Server::Adapters::SubjectSet}
-  let(:subject_class) { Cellect::Server::Adapters::SetMemberSubject }
-  let(:uss_class) { Cellect::Server::Adapters::UserSeenSubject }
-  
+  let(:workflow_class) { Cellect::Server::Adapters::PanoptesAssociation::Workflow }
+  let(:set_class) { Cellect::Server::Adapters::PanoptesAssociation::SubjectSet}
+  let(:subject_class) { Cellect::Server::Adapters::PanoptesAssociation::SetMemberSubject }
+  let(:uss_class) { Cellect::Server::Adapters::PanoptesAssociation::UserSeenSubject }
+
   let(:workflows) do
     w1 = workflow_class.create! do |w|
        w.prioritized = false
@@ -32,14 +32,14 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
     subject_set = set_class.create! do |set|
       set.workflow_id = 1
     end
-    
+
     s1 = subject_class.create! do |s|
        s.subject_set_id = subject_set.id
        s.subject_id = 1
        s.state = 0
        s.priority = 1.234123
      end
-     
+
      s2 = subject_class.create! do |s|
        s.subject_set_id = subject_set.id
        s.subject_id = 2
@@ -73,7 +73,7 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
                                                                     "pairwise" => workflow.pairwise)
       end
     end
-    
+
     context 'many workflows' do
       it 'should load all the givien workflows' do
         expect(subject.workflow_list(*workflows.map(&:id)).length).to eq(2)

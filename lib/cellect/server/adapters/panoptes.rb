@@ -3,29 +3,31 @@ require 'active_record'
 module Cellect
   module Server
     module Adapters
-      class Workflow < ActiveRecord::Base
-        has_many :subject_sets
+      module PanoptesAssociation
+        class Workflow < ActiveRecord::Base
+          has_many :subject_sets
+        end
+
+        class SubjectSet < ActiveRecord::Base
+          belongs_to :workflow
+          has_many :set_member_subjects
+        end
+
+        class SetMemberSubject < ActiveRecord::Base
+          belongs_to :subject_set
+        end
+
+        class UserSeenSubject < ActiveRecord::Base
+        end
       end
 
-      class SubjectSet < ActiveRecord::Base
-        belongs_to :workflow
-        has_many :set_member_subjects
-      end
-
-      class SetMemberSubject < ActiveRecord::Base
-        belongs_to :subject_set
-      end
-
-      class UserSeenSubject < ActiveRecord::Base
-      end
-      
       class Panoptes < Default
         def initialize
           ActiveRecord::Base.establish_connection(**connection_options)
         end
 
         def workflow_list(*names)
-          Workflow.select(:id, :prioritized, :pairwise, :grouped)
+          PanoptesAssociation::Workflow.select(:id, :prioritized, :pairwise, :grouped)
             .where(id: names)
             .map do |row|
             {
@@ -39,7 +41,7 @@ module Cellect
         end
 
         def load_data_for(workflow_name)
-          SetMemberSubject.joins(:subject_set)
+          PanoptesAssociation::SetMemberSubject.joins(:subject_set)
             .where(subject_sets: { workflow_id: workflow_name },
                    state: 0)
             .select(:subject_id, :priority, :subject_set_id)
@@ -53,7 +55,7 @@ module Cellect
         end
 
         def load_user(workflow_name, user_id)
-          UserSeenSubject.where(workflow_id: workflow_name,
+          PanoptesAssociation::UserSeenSubject.where(workflow_id: workflow_name,
                                 user_id: user_id)
             .select(:subject_ids)
             .map do |row|
