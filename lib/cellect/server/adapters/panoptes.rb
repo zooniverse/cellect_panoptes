@@ -70,7 +70,8 @@ module Cellect
             port: ENV.fetch('PG_PORT', '5432'),
             dbname: ENV.fetch('PG_DB', 'cellect'),
             user: ENV.fetch('PG_USER', 'cellect'),
-            password: ENV.fetch('PG_PASS', '')
+            password: ENV.fetch('PG_PASS', ''),
+            pool: ENV.fetch('PG_POOL_SIZE', 8)
           }
         end
       end
