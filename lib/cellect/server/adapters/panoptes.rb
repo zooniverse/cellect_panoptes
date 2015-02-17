@@ -32,7 +32,7 @@ module Cellect
             .map do |row|
             {
               'id' => row.id,
-              'name' => row.id,
+              'name' => "#{row.id}",
               'prioritized' => row.prioritized,
               'pairwise' => row.pairwise,
               'grouped' => row.grouped
