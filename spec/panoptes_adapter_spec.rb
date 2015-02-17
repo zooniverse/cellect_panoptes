@@ -67,7 +67,7 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
       it 'should load a workflow with the given id' do
         workflow = workflows.first
         expect(subject.workflow_list(workflow.id).first).to include("id" => workflow.id,
-                                                                    "name" => workflow.id,
+                                                                    "name" => workflow.id.to_s,
                                                                     "prioritized" => workflow.prioritized,
                                                                     "grouped" => workflow.grouped,
                                                                     "pairwise" => workflow.pairwise)
