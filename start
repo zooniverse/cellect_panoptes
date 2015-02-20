@@ -1,56 +1,28 @@
 #!/usr/bin/env ruby
+require_relative 'cellect_env'
 
-# -*- mode: ruby; -*-
+class CellectStart
+  include CellectEnv
 
-require 'yaml'
+  def initialize
+    setup_puma_cmd
+    setup_env_vars
+  end
 
-def stringify_value(value)
-  return value if value.nil?
-  value = value.to_s
-  value.empty? ? nil : value
+  def run
+    if ENV['DEBUG_CELLECT_START']
+      p @env_vars
+      p @puma_cmd
+    end
+    exit system(@env_vars, @puma_cmd)
+  end
+
+  private
+
+  def setup_puma_cmd
+    @puma_cmd = "puma -b tcp://0.0.0.0:80 -t 8:16"
+  end
 end
 
-environment = ENV['ENVIRONMENT']
-if environment == nil
-  environment = 'production'
-end
 
-begin
-  databases = YAML.load(File.read("/production_config/database.yml"))
-  db = databases[environment]
-  PG_HOST = db['host']
-  PG_PORT = db['port']
-  PG_DB = db['database']
-  PG_USER = db['user']
-  PG_PASS = db['password']
-  PG_POOL = db['pool']
-rescue Errno::ENOENT
-  PG_HOST = ENV['PG_PORT_5432_TCP_ADDR']
-  PG_PORT = ENV['PG_PORT_5432_TCP_PORT']
-  PG_DB = ENV['PG_ENV_DB']
-  PG_USER = ENV['PG_ENV_PG_USER']
-  PG_PASS = ENV['PG_ENV_PASS']
-  PG_POOL = ENV['PG_ENV_POOL']
-end
-
-begin
-  zookeepers = YAML.load(File.read("/production_config/zookeeper.yml"))
-  zk = zookeepers[environment]
-  ZK_URL = "#{zk['host']}:#{zk['port']}"
-rescue Errno::ENOENT
-  ZK_URL = "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
-end
-
-puma_cmd = "puma -b tcp://0.0.0.0:80 -t 8:16"
-
-
-env_vars = { "ZK_URL" => ZK_URL, "PG_POOL" => stringify_value(PG_POOL),
-             "PG_HOST" => PG_HOST, "PG_PORT" => stringify_value(PG_PORT),
-             "PG_DB" => PG_DB, "PG_USER" => PG_USER, "PG_PASS" =>PG_PASS }
-
-if ENV['DEBUG_CELLECT_START']
-  p env_vars
-  p puma_cmd
-end
-
-exit system(env_vars, puma_cmd)
+CellectStart.new.run

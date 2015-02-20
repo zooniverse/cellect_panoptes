@@ -1,0 +1,19 @@
+postgres:
+  image: zooniverse/postgresql
+  environment:
+    - "PG_USER=panoptes"
+    - "DB=panoptes_development"
+    - "PASS=panoptes"
+
+zookeeper:
+  image: zooniverse/zookeeper
+  command: /usr/share/zookeeper/bin/zkServer.sh start-foreground -c localhost:2888:3888 -i 1
+
+cellect:
+  #image: zooniverse/cellect-panoptes
+  build: .
+  ports:
+    - "4000:80"
+  links:
+    - postgres:pg
+    - zookeeper:zk
