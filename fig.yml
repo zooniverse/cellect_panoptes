@@ -14,6 +14,8 @@ cellect:
   build: .
   ports:
     - "4000:80"
+  volumes:
+    - ./tmp:/cellect_panoptes/tmp
   links:
     - postgres:pg
     - zookeeper:zk
