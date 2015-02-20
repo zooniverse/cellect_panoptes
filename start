@@ -4,6 +4,12 @@
 
 require 'yaml'
 
+def stringify_value(value)
+  return value if value.nil?
+  value = value.to_s
+  value.empty? ? nil : value
+end
+
 environment = ENV['ENVIRONMENT']
 if environment == nil
   environment = 'production'
@@ -17,14 +23,14 @@ begin
   PG_DB = db['database']
   PG_USER = db['user']
   PG_PASS = db['password']
-  PG_POOL_SIZE = db['pool']
+  PG_POOL = db['pool']
 rescue Errno::ENOENT
   PG_HOST = ENV['PG_PORT_5432_TCP_ADDR']
   PG_PORT = ENV['PG_PORT_5432_TCP_PORT']
   PG_DB = ENV['PG_ENV_DB']
   PG_USER = ENV['PG_ENV_PG_USER']
   PG_PASS = ENV['PG_ENV_PASS']
-  PG_POOL_SIZE = ENV['PG_ENV_POOL']
+  PG_POOL = ENV['PG_ENV_POOL']
 end
 
 begin
@@ -37,7 +43,14 @@ end
 
 puma_cmd = "puma -b tcp://0.0.0.0:80 -t 8:16"
 
-env_vars = { "ZK_URL" => ZK_URL, "PG_POOL_SIZE" => PG_POOL_SIZE,
-             "PG_HOST" => PG_HOST, "PG_PORT" => PG_PORT, "PG_DB" => PG_DB,
-             "PG_USER" => PG_USER, "PG_PASS" =>PG_PASS }
+
+env_vars = { "ZK_URL" => ZK_URL, "PG_POOL" => stringify_value(PG_POOL),
+             "PG_HOST" => PG_HOST, "PG_PORT" => stringify_value(PG_PORT),
+             "PG_DB" => PG_DB, "PG_USER" => PG_USER, "PG_PASS" =>PG_PASS }
+
+if ENV['DEBUG_CELLECT_START']
+  p env_vars
+  p puma_cmd
+end
+
 exit system(env_vars, puma_cmd)
