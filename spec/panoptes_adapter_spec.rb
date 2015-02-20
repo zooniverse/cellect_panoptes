@@ -57,9 +57,45 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
     uss_class.destroy_all
   end
 
-  it 'should have started an ActiveRecord connection' do
-    subject
-    expect(ActiveRecord::Base.connection).to_not be_nil
+  describe "ActiveRecord connection" do
+
+    it 'should have started' do
+      subject
+      expect(ActiveRecord::Base.connection).to_not be_nil
+    end
+
+    describe "connection pool value" do
+      before(:each) do
+        ENV['PG_POOL'] = pool_value
+      end
+
+      context "when nil" do
+        let(:pool_value) { nil }
+
+        it 'should not raise an error' do
+          subject
+          expect { ActiveRecord::Base.connection }.not_to raise_error
+        end
+      end
+
+      context "when blank" do
+        let(:pool_value) { '' }
+
+        it 'should not raise an error' do
+          subject
+          expect { ActiveRecord::Base.connection }.not_to raise_error
+        end
+      end
+
+      context "when 0" do
+        let(:pool_value) { '0' }
+
+        it 'should not raise an error' do
+          subject
+          expect { ActiveRecord::Base.connection }.not_to raise_error
+        end
+      end
+    end
   end
 
   describe "#workflow_list" do

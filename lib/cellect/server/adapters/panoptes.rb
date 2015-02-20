@@ -22,6 +22,9 @@ module Cellect
       end
 
       class Panoptes < Default
+
+        DEFAULT_POOL_SIZE = 8
+
         def initialize
           ActiveRecord::Base.establish_connection(**connection_options)
         end
@@ -71,8 +74,17 @@ module Cellect
             dbname: ENV.fetch('PG_DB', 'cellect'),
             user: ENV.fetch('PG_USER', 'cellect'),
             password: ENV.fetch('PG_PASS', ''),
-            pool: ENV.fetch('PG_POOL_SIZE', 8)
+            pool: connection_pool_value
           }
+        end
+
+        def connection_pool_value
+          pool_val = ENV.fetch('PG_POOL', DEFAULT_POOL_SIZE).to_s
+          if ['', '0'].include?(pool_val)
+            DEFAULT_POOL_SIZE
+          else
+            pool_val.to_s
+          end
         end
       end
     end
