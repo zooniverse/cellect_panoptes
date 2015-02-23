@@ -4,6 +4,8 @@ postgres:
     - "PG_USER=panoptes"
     - "DB=panoptes_development"
     - "PASS=panoptes"
+  volumes:
+    - ./tmp:/tmp
 
 zookeeper:
   image: zooniverse/zookeeper
@@ -12,10 +14,10 @@ zookeeper:
 cellect:
   #image: zooniverse/cellect-panoptes
   build: .
+  volumes:
+    - ./:/cellect_panoptes
   ports:
     - "4000:80"
-  volumes:
-    - ./tmp:/cellect_panoptes/tmp
   links:
     - postgres:pg
     - zookeeper:zk
