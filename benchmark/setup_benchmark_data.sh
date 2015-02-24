@@ -1,39 +1,32 @@
-#Create the set of data to benchmark with start with
+#1. Create the set of data to benchmark with start with (locally or via fig)
+#./benchmark/create_csv_data.rb
 #fig run --rm --entrypoint=/bin/bash cellect -c "benchmark/create_csv_data.rb"
-#fig run --rm --entrypoint=/bin/bash cellect -c "benchmark/create_db_schema.rb"
-#fig run --rm --entrypoint=/bin/bash cellect -c "benchmark/load_csv_data.rb"
 
-#
-1. load a workflow for a user
+#2. create the db schema
+fig run --rm --entrypoint=/bin/bash cellect -c "benchmark/create_db_schema.rb"
 
-2. select some subjects for users.
+#3. load a set of User seens subjects for cellect
+fig run --rm --entrypoint=/bin/bash cellect -c "benchmark/load_csv_data.rb"
 
-32. update seen subjects for users / simulate classifications coming down
-# user_seen_subjects = []
-# sets.each do |set|
-#   set.push(workflow_id)
-# end
-#
-# subject_ids = sets.flat_map{ |s| subjects.select{ |ss| ss[1] == s[0] }.map{ |s| s[0] } }
-#
-# users_per_workflow = 10_000 + rand(50_000)
-# user_seen_subjects_id_offset = 1
-#
-# user_seen_distribution = []
-# 380.times{ user_seen_distribution << [    1,      10] }
-# 180.times{ user_seen_distribution << [   10,      20] }
-# 230.times{ user_seen_distribution << [   20,      50] }
-#  90.times{ user_seen_distribution << [   50,     100] }
-# 100.times{ user_seen_distribution << [  100,   1_000] }
-#  17.times{ user_seen_distribution << [1_000,   5_000] }
-#   3.times{ user_seen_distribution << [5_000, 50_000] }
-#
-# 1.upto(users_per_workflow).each do |user_id|
-#   user_seen_range = user_seen_distribution.sample
-#   seen_count = user_seen_range[0] + rand(user_seen_range[1])
-#   seen_ids = subject_ids.sample(seen_count)
-#   user_seen_subjects << [user_id + user_seen_subjects_id_offset, "\"{#{ seen_ids.join(",") }}\"", workflow_id, user_id]
-#
-# end
-# user_seen_subjects_id_offset += users_per_workflow
-# File.open("#{FILE_PREFIX}/user_seen_subjects.csv", 'w') { |f| f.write(user_seen_subjects.map{ |l| l.join(',') }.join("\n")) }
+#Power users to test cellect with for the current USS se
+#3685,9616,4013,6538,1863
+
+## TEST THE SERVER (see fig.yml for ports) using curl
+#load subjects
+#curl -s -H 'Accept: application/json' http://localhost:4000/workflows/1/status
+
+#load a user seen set
+#curl -s -H 'Accept: application/json' http://localhost:4000/workflows/1/users/2/load
+
+#get some subjects for a user
+curl -s -H 'Accept: application/json' http://localhost:4000/workflows/1?user_id=2
+
+
+# TODO: simulate a peak real workload as it happens, i.e. 10K users hit the site
+#       on day 3 with 5 Mil+ seen subjects for 500K subjects.
+#       If cellect can handle that then we're looking good.
+#       If not what can 1 mode handle and how many nodes do we need for the peak load.
+
+#1. load a workflow for a user
+#2. select some subjects for users.
+#3. update seen subjects for users / simulate classifications coming down
