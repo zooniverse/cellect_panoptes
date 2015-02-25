@@ -30,9 +30,11 @@ module Cellect
         end
 
         def workflow_list(*names)
-          PanoptesAssociation::Workflow.select(:id, :prioritized, :pairwise, :grouped)
-            .where(id: names)
-            .map do |row|
+          workflow_data = PanoptesAssociation::Workflow
+                           .select(:id, :prioritized, :pairwise, :grouped)
+                           .where(id: names)
+          release_connection
+          workflow_data.map do |row|
             {
               'id' => row.id,
               'name' => "#{row.id}",
@@ -44,11 +46,12 @@ module Cellect
         end
 
         def load_data_for(workflow_name)
-          PanoptesAssociation::SetMemberSubject.joins(:subject_set)
+          subject_data = PanoptesAssociation::SetMemberSubject.joins(:subject_set)
             .where(subject_sets: { workflow_id: workflow_name },
                    state: 0)
             .select(:subject_id, :priority, :subject_set_id)
-            .map do |row|
+          release_connection
+          subject_data.map do |row|
             {
               'id' => row.subject_id,
               'priority' => row.priority,
@@ -58,13 +61,15 @@ module Cellect
         end
 
         def load_user(workflow_name, user_id)
-          PanoptesAssociation::UserSeenSubject.where(workflow_id: workflow_name,
-                                user_id: user_id)
-            .select(:subject_ids)
-            .map do |row|
-            row.subject_ids
-          end
+          subject_ids = PanoptesAssociation::UserSeenSubject
+                          .where(workflow_id: workflow_name,
+                                 user_id: user_id)
+                          .pluck(:subject_ids)
+          release_connection
+          subject_ids.flatten!
         end
+
+        private
 
         def connection_options
           {
@@ -85,6 +90,10 @@ module Cellect
           else
             pool_val.to_s
           end
+        end
+
+        def release_connection
+          ActiveRecord::Base.connection_pool.release_connection
         end
       end
     end
