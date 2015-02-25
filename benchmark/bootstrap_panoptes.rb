@@ -15,6 +15,7 @@ class BootstrapPanoptes
   WORKFLOW_ID = 1
   STD_USER_CLASSIFICATION_COUNT = 15
   POWER_USER_IDS = [ 3685, 9616, 4013, 6538, 1863 ]
+  CSV_QUOTE_CHAR = "'"
 
   def initialize
     setup_env_vars
@@ -157,22 +158,22 @@ class BootstrapPanoptes
         seen_count = user_seen_range[0] + rand(user_seen_range[1])
         seen_id = subject_ids.sample
         user_id = uss_id
-        user_seen_subjects << [uss_id_offset, "{#{ seen_id }}", WORKFLOW_ID, user_id]
+        user_seen_subjects << [uss_id_offset, "\"{#{ seen_id }}\"", WORKFLOW_ID, user_id]
         uss_id_offset += 1
       end
     end
 
     #power users and the long tail
     percent_complete = (SUBJECT_DIST * 0.85).to_i
-    puts "\n\nPower user ids:  #{POWER_USER_IDS.join(",")}\nUse these in you cellect benchmarking.\n"
+    puts "\n\nPower user ids:  #{POWER_USER_IDS.join(",")}\nUse these in your cellect benchmarking.\n"
     subject_ids.sample(percent_complete).each do |subject_id|
       long_tail_user_ids = stargazing_user_ids.sample(long_tail_user_count)
       (POWER_USER_IDS | long_tail_user_ids).each do |user_id|
-        user_seen_subjects << [uss_id_offset, "{#{ subject_id }}", WORKFLOW_ID, user_id]
+        user_seen_subjects << [uss_id_offset, "\"{#{ subject_id }}\"", WORKFLOW_ID, user_id]
         uss_id_offset += 1
       end
     end
-    CSV.open("#{FILE_PREFIX}/user_seen_subjects.csv", "wb") do |csv|
+    CSV.open("#{FILE_PREFIX}/user_seen_subjects.csv", "wb", quote_char: CSV_QUOTE_CHAR) do |csv|
       user_seen_subjects.each { |uss_row| csv << uss_row }
     end
   end
