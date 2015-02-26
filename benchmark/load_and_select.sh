@@ -17,8 +17,8 @@ for i in "${power_users[@]}"; do
   time curl -H 'Accept: application/json' "${curl_prefix}/?user_id=$i"
 done
 
-#load each user in order and select some subjects
-for i in {1..250}; do
+#load a thousand empty users and select over them
+for i in {1..1000}; do
   time curl -X POST -H 'Accept: application/json' "${curl_prefix}/users/$i/load"
   time curl -H 'Accept: application/json' "${curl_prefix}/?user_id=$i"
 done
