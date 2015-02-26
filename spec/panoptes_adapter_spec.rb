@@ -133,7 +133,7 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
         u.user_id = 1
         u.subject_ids = [1,2,3,4]
       end
-      expect(subject.load_user(1, 1)).to eq([[1, 2, 3, 4]])
+      expect(subject.load_user(1, 1)).to eq([1, 2, 3, 4])
     end
   end
 end

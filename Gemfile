@@ -7,4 +7,7 @@ gem "activerecord"
 gem "connection_pool"
 gem "oj"
 gem "cellect-server"
-gem "rspec", group: :development
+group :development do
+  gem "rspec"
+  gem "pry"
+end

@@ -15,7 +15,8 @@ RUN apt-get update && \
 WORKDIR /cellect_panoptes
 ADD . /cellect_panoptes
 
-RUN bundle install --without development
+RUN bundle install
+#--without development
 RUN chmod +x /cellect_panoptes/start
 
 EXPOSE 80

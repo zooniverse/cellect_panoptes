@@ -7,9 +7,9 @@ namespace :db do
     require 'active_record'
     user = `whoami`.chomp
     ENV['DATABASE_NAME'] ||= "cellect_panoptes_test"
-    ENV['DATABASE_URL'] ||= "postgres://#{user}:#{ENV['DATABASE_PASSWORD'] || user}@localhost:5432/#{ENV['DATABASE_NAME']}" 
+    ENV['DATABASE_URL'] ||= "postgres://#{user}:#{ENV['DATABASE_PASSWORD'] || user}@localhost:5432/#{ENV['DATABASE_NAME']}"
   end
-  
+
   task :drop => :load_db_settings do
     `dropdb #{ENV['DATABASE_NAME']}`
   end
@@ -26,18 +26,18 @@ namespace :db do
       t.boolean :pairwise
       t.boolean :grouped
     end
-    
+
     ActiveRecord::Base.connection.create_table :subject_sets, force: true do |t|
       t.integer :workflow_id
     end
-    
+
     ActiveRecord::Base.connection.create_table :set_member_subjects, force: true do |t|
       t.integer :subject_set_id
       t.integer :subject_id
       t.float :priority
       t.integer :state
     end
-    
+
     ActiveRecord::Base.connection.create_table :user_seen_subjects, force: true do |t|
       t.integer :user_id
       t.integer :workflow_id
