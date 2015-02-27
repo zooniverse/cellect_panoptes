@@ -15,6 +15,7 @@ class BootstrapPanoptes
   WORKFLOW_ID = 1
   STD_USER_CLASSIFICATION_COUNT = 15
   POWER_USER_IDS = [ 3685, 9616, 4013, 6538, 1863 ]
+  POWER_USER_SET_SIZE = 0.85
   CSV_QUOTE_CHAR = "'"
 
   def initialize
@@ -154,6 +155,7 @@ class BootstrapPanoptes
     #a number of classifications for each user
     STD_USER_CLASSIFICATION_COUNT.times do
       stargazing_user_ids.each do |uss_id|
+        next if POWER_USER_IDS.include?(uss_id)
         user_seen_range = user_seen_distribution.sample
         seen_count = user_seen_range[0] + rand(user_seen_range[1])
         seen_id = subject_ids.sample
@@ -164,8 +166,8 @@ class BootstrapPanoptes
     end
 
     #power users and the long tail
-    percent_complete = (SUBJECT_DIST * 0.85).to_i
-    puts "\n\nPower user ids:  #{POWER_USER_IDS.join(",")}\nUse these in your cellect benchmarking.\n"
+    percent_complete = (SUBJECT_DIST * POWER_USER_SET_SIZE).to_i
+    puts "\n\nPower user ids: #{POWER_USER_IDS.join(", ")}\nUse these in your cellect benchmarking.\n"
     subject_ids.sample(percent_complete).each do |subject_id|
       long_tail_user_ids = stargazing_user_ids.sample(long_tail_user_count)
       (POWER_USER_IDS | long_tail_user_ids).each do |user_id|
