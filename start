@@ -20,7 +20,7 @@ class CellectStart
   private
 
   def setup_puma_cmd
-    @puma_cmd = "puma -b tcp://0.0.0.0:80 -t 8:16"
+    @puma_cmd = "puma -b tcp://0.0.0.0:80 -t 32:64"
   end
 end
 
