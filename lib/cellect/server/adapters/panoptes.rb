@@ -30,10 +30,11 @@ module Cellect
         end
 
         def workflow_list(*names)
-          workflow_data = PanoptesAssociation::Workflow
-                           .select(:id, :prioritized, :pairwise, :grouped)
-                           .where(id: names)
-          release_connection
+          workflow_data = with_connection do
+            PanoptesAssociation::Workflow
+                             .select(:id, :prioritized, :pairwise, :grouped)
+                             .where(id: names)
+          end
           workflow_data.map do |row|
             {
               'id' => row.id,
@@ -46,11 +47,12 @@ module Cellect
         end
 
         def load_data_for(workflow_name)
-          subject_data = PanoptesAssociation::SetMemberSubject.joins(:subject_set)
+          subject_data = with_connection do
+            PanoptesAssociation::SetMemberSubject.joins(:subject_set)
             .where(subject_sets: { workflow_id: workflow_name },
                    state: 0)
             .select(:subject_id, :priority, :subject_set_id)
-          release_connection
+          end
           subject_data.map do |row|
             {
               'id' => row.subject_id,
@@ -61,12 +63,13 @@ module Cellect
         end
 
         def load_user(workflow_name, user_id)
-          subject_ids = PanoptesAssociation::UserSeenSubject
-                          .where(workflow_id: workflow_name,
-                                 user_id: user_id)
-                          .pluck(:subject_ids)
-          release_connection
-          subject_ids.flatten!
+          with_connection do
+            subject_ids = PanoptesAssociation::UserSeenSubject
+                            .where(workflow_id: workflow_name,
+                                   user_id: user_id)
+                            .pluck(:subject_ids)
+            subject_ids.flatten!
+          end
         end
 
         private
@@ -92,8 +95,8 @@ module Cellect
           end
         end
 
-        def release_connection
-          ActiveRecord::Base.connection_pool.release_connection
+        def with_connection(&block)
+          ActiveRecord::Base.connection_pool.with_connection &block
         end
       end
     end
