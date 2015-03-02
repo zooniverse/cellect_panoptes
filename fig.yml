@@ -22,6 +22,7 @@ cellect:
     - "4000:80"
   environment:
     - "DEBUG_CELLECT_START=true"
+    - "PUMA_MAX_THREADS=64"
   links:
     - postgres:pg
     - zookeeper:zk

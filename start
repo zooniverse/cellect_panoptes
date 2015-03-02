@@ -5,8 +5,8 @@ class CellectStart
   include CellectEnv
 
   def initialize
-    setup_puma_cmd
     setup_env_vars
+    setup_puma_cmd
   end
 
   def run
@@ -20,7 +20,16 @@ class CellectStart
   private
 
   def setup_puma_cmd
-    @puma_cmd = "puma -b tcp://0.0.0.0:80 -t 32:64"
+    @puma_cmd = "puma -b tcp://0.0.0.0:80 -t 0:#{puma_max_threads}"
+  end
+
+  def puma_max_threads
+    max_threads = ENV['PUMA_MAX_THREADS'] || @pg_pool
+    if max_threads.nil? || max_threads.empty?
+      16
+    else
+      max_threads
+    end
   end
 end
 
