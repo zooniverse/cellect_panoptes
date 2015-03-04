@@ -25,7 +25,7 @@ class CellectStart
 
   def puma_max_threads
     max_threads = ENV['PUMA_MAX_THREADS'] || @pg_pool
-    if max_threads.nil? || max_threads.empty?
+    if max_threads.nil? || max_threads.to_s.empty?
       16
     else
       max_threads
