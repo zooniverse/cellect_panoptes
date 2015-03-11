@@ -1,2 +1,4 @@
 .ruby-*
 tmp/*
+log/
+newrelic.yml
