@@ -1,10 +1,12 @@
 #!/usr/bin/env ruby
 require_relative 'cellect_env'
+require 'fileutils'
 
 class CellectStart
   include CellectEnv
 
   def initialize
+    setup_new_relic_config
     setup_env_vars
     setup_puma_cmd
   end
@@ -30,6 +32,17 @@ class CellectStart
     else
       max_threads
     end
+  end
+
+  def setup_new_relic_config
+    source_path = '/production_config/cellect_panoptes_newrelic.yml'
+    return unless File.exist?(source_path)
+    dest_path = '/cellect_panoptes/newrelic.yml'
+    dest_exists_as_file_or_link = File.exist?(dest_path) || File.symlink?(dest_path)
+    return if dest_exists_as_file_or_link
+    FileUtils.ln_sf(source_path, dest_path)
+  rescue Errno::ENOENT => e
+    p e.message
   end
 end
 
