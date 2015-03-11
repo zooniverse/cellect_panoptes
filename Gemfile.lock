@@ -70,6 +70,7 @@ GEM
     minitest (5.5.1)
     multi_json (1.10.1)
     multi_xml (0.5.5)
+    newrelic_rpm (3.10.0.279)
     nio4r (1.1.0)
     oj (2.11.4)
     pg (0.18.1)
@@ -126,6 +127,7 @@ DEPENDENCIES
   activerecord
   cellect-server
   connection_pool
+  newrelic_rpm
   oj
   pg
   postgres_ext
