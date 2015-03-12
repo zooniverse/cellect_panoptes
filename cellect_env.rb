@@ -34,7 +34,7 @@ module CellectEnv
       @pg_host = db['host']
       @pg_port = db['port']
       @pg_db = db['database']
-      @pg_user = db['user']
+      @pg_user = db['username']
       @pg_pass = db['password']
       @pg_pool = db['pool']
     rescue Errno::ENOENT
