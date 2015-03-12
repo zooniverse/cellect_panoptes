@@ -14,13 +14,14 @@ module CellectEnv
     load_zk_yaml
     @env_vars = { "ZK_URL" => @zk_url, "PG_POOL" => stringify_value(@pg_pool),
                   "PG_HOST" => @pg_host, "PG_PORT" => stringify_value(@pg_port),
-                  "PG_DB" => @pg_db, "PG_USER" => @pg_user, "PG_PASS" => @pg_pass }
+                  "PG_DB" => @pg_db, "PG_USER" => @pg_user, "PG_PASS" => @pg_pass,
+                  "RACK_ENV" => @environment }
   end
 
   private
 
   def setup_environment
-    @environment = ENV['ENVIRONMENT']
+    @environment = ENV['RACK_ENV']
     if @environment == nil
       @environment = 'production'
     end

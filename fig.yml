@@ -21,7 +21,7 @@ cellect:
   ports:
     - "4000:80"
   environment:
-    - "ENVIRONMENT=development"
+    - "RACK_ENV=development"
     - "DEBUG_CELLECT_START=true"
     - "PUMA_MAX_THREADS=64"
   links:
