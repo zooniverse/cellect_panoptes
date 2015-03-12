@@ -7,7 +7,8 @@ ENV LC_ALL en_US.UTF-8
 
 RUN apt-get update && \
     apt-get -y upgrade && \
-    apt-get install -y --no-install-recommends autoconf automake libboost-all-dev libffi-dev git-core && \
+    apt-get install -y --no-install-recommends autoconf automake \
+        libboost-all-dev libffi-dev git-core supervisor && \
     apt-get autoremove && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
@@ -15,10 +16,14 @@ RUN apt-get update && \
 WORKDIR /cellect_panoptes
 ADD . /cellect_panoptes
 
+ADD supervisord.conf /etc/supervisor/conf.d/cellect.conf
+
 RUN bundle install
 #--without development
 RUN chmod +x /cellect_panoptes/start
 
 EXPOSE 80
 
-ENTRYPOINT /cellect_panoptes/start
+VOLUME /cellect_panoptes/log
+
+ENTRYPOINT [ "/usr/bin/supervisord" ]
