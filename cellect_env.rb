@@ -51,7 +51,7 @@ module CellectEnv
     begin
       zookeepers = YAML.load(File.read("/production_config/zookeeper.yml"))
       zk = zookeepers[@environment]
-      @zk_url = "#{zk['host']}:#{zk['port']}"
+      @zk_url = zk['url']
     rescue Errno::ENOENT
       @zk_url = "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
     end
