@@ -24,6 +24,7 @@ cellect:
     - "RACK_ENV=development"
     - "DEBUG_CELLECT_START=true"
     - "PUMA_MAX_THREADS=64"
+    - "PRELOAD_WORKFLOWS=1"
   links:
     - postgres:pg
     - zookeeper:zk

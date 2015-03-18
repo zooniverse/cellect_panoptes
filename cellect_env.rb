@@ -10,12 +10,13 @@ module CellectEnv
 
   def setup_env_vars
     setup_environment
+    preload_workflows
     load_db_yaml
     load_zk_yaml
     @env_vars = { "ZK_URL" => @zk_url, "PG_POOL" => stringify_value(@pg_pool),
                   "PG_HOST" => @pg_host, "PG_PORT" => stringify_value(@pg_port),
                   "PG_DB" => @pg_db, "PG_USER" => @pg_user, "PG_PASS" => @pg_pass,
-                  "RACK_ENV" => @environment }
+                  "RACK_ENV" => @environment, "PRELOAD_WORKFLOWS" => @preload_workflows }
   end
 
   private
@@ -25,6 +26,11 @@ module CellectEnv
     if @environment == nil
       @environment = 'production'
     end
+  end
+
+  def preload_workflows
+    ids = (ENV['PRELOAD_WORKFLOWS'] || "").split(",")
+    @preload_workflows = ids.map(&:to_i).select { |int| int != 0 }.join(",")
   end
 
   def load_db_yaml
