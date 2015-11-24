@@ -1,8 +1,10 @@
-require 'newrelic_rpm'
+require 'bundler'
+Bundler.require(:default, ENV['RACK_ENV'])
 
 use ActiveRecord::ConnectionAdapters::ConnectionManagement
 
-require 'cellect/server'
+Grape::ActiveRecord.database_file = 'config/database.yml'
+
 require_relative 'lib/cellect/server/adapters/panoptes'
 
 Cellect::Server.adapter = Cellect::Server::Adapters::Panoptes.new

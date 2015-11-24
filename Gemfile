@@ -8,6 +8,7 @@ gem "connection_pool", '~> 2.2.0'
 gem "oj", '~> 2.13.1'
 gem "cellect-server", '~> 0.1.3'
 gem 'newrelic_rpm', '~> 3.14'
+gem 'grape-activerecord', '~> 1.0'
 
 group :development do
   gem "rspec"
