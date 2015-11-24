@@ -15,7 +15,7 @@ module CellectEnv
     load_zk_yaml
     @env_vars = {
       "ZK_URL" => @zk_url,
-      "DATABASE_URL" => "postgresql://#{@pg_user}:#{@pg_pass}@#{@pg_host}:#{@pg_port}/#{@pg_db}?pool=#{connection_pool_value}",
+      "DATABASE_URL" => database_url,
       "RACK_ENV" => @environment,
       "PRELOAD_WORKFLOWS" => @preload_workflows
     }
@@ -35,6 +35,16 @@ module CellectEnv
     @preload_workflows = ids.map(&:to_i).select { |int| int != 0 }.join(",")
   end
 
+  def load_zk_yaml
+    begin
+      zookeepers = YAML.load(File.read("/production_config/zookeeper.yml"))
+      zk = zookeepers[@environment]
+      @zk_url = zk['url']
+    rescue Errno::ENOENT
+      @zk_url = "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
+    end
+  end
+
   def load_db_yaml
     begin
       databases = YAML.load(File.read("/production_config/database.yml"))
@@ -49,9 +59,9 @@ module CellectEnv
       @pg_host = ENV['PG_PORT_5432_TCP_ADDR']
       @pg_port = ENV['PG_PORT_5432_TCP_PORT']
       @pg_db = ENV['PG_ENV_DB']
-      @pg_user = ENV['PG_ENV_PG_USER']
-      @pg_pass = ENV['PG_ENV_PASS']
-      @pg_pool = ENV['PG_ENV_POOL']
+      @pg_user = ENV['PG_ENV_POSTGRES_USER']
+      @pg_pass = ENV['PG_ENV_POSTGRES_PASSWORD']
+      @pg_pool = ENV['PG_ENV_POSTGRES_POOL']
     end
   end
 
@@ -68,13 +78,8 @@ module CellectEnv
     end
   end
 
-  def load_zk_yaml
-    begin
-      zookeepers = YAML.load(File.read("/production_config/zookeeper.yml"))
-      zk = zookeepers[@environment]
-      @zk_url = zk['url']
-    rescue Errno::ENOENT
-      @zk_url = "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
-    end
+  def database_url
+    ENV['DATABASE_URL'] ||
+    "postgresql://#{@pg_user}:#{@pg_pass}@#{@pg_host}:#{@pg_port}/#{@pg_db}?pool=#{connection_pool_value}"
   end
 end

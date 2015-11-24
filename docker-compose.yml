@@ -1,14 +1,11 @@
 postgres:
-  image: zooniverse/postgresql
+  image: postgres
   environment:
-    - "PG_USER=panoptes"
-    - "DB=panoptes_development"
-    - "PASS=panoptes"
-    - "POOL=64"
-  volumes:
-    - ./tmp:/tmp
+    - "POSTGRES_USER=panoptes"
+    - "POSTGRES_PASSWORD=panoptes"
+    - "POSTGRES_POOL=64"
   ports:
-    - "5432:5432"
+    - "6000:5432"
 
 zookeeper:
   image: zooniverse/zookeeper
@@ -16,6 +13,7 @@ zookeeper:
 
 cellect:
   build: .
+  dockerfile: Dockerfile.dev
   volumes:
     - ./:/cellect_panoptes
   ports:
@@ -23,8 +21,8 @@ cellect:
   environment:
     - "RACK_ENV=development"
     - "DEBUG_CELLECT_START=true"
-    - "PUMA_MAX_THREADS=64"
-    - "PRELOAD_WORKFLOWS=1"
+    - "PUMA_MAX_THREADS=16"
+    # - "PRELOAD_WORKFLOWS=1"
   links:
     - postgres:pg
     - zookeeper:zk
