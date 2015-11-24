@@ -41,7 +41,7 @@ module CellectEnv
       zk = zookeepers[@environment]
       @zk_url = zk['url']
     rescue Errno::ENOENT
-      @zk_url = "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
+      @zk_url = zk_url
     end
   end
 
@@ -81,5 +81,10 @@ module CellectEnv
   def database_url
     ENV['DATABASE_URL'] ||
     "postgresql://#{@pg_user}:#{@pg_pass}@#{@pg_host}:#{@pg_port}/#{@pg_db}?pool=#{connection_pool_value}"
+  end
+
+  def zk_url
+    ENV['ZK_URL'] ||
+    "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
   end
 end
