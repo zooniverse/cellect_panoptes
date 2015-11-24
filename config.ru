@@ -1,4 +1,7 @@
 require 'newrelic_rpm'
+
+use ActiveRecord::ConnectionAdapters::ConnectionManagement
+
 require 'cellect/server'
 require_relative 'lib/cellect/server/adapters/panoptes'
 

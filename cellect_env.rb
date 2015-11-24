@@ -13,10 +13,12 @@ module CellectEnv
     preload_workflows
     load_db_yaml
     load_zk_yaml
-    @env_vars = { "ZK_URL" => @zk_url, "PG_POOL" => stringify_value(@pg_pool),
-                  "PG_HOST" => @pg_host, "PG_PORT" => stringify_value(@pg_port),
-                  "PG_DB" => @pg_db, "PG_USER" => @pg_user, "PG_PASS" => @pg_pass,
-                  "RACK_ENV" => @environment, "PRELOAD_WORKFLOWS" => @preload_workflows }
+    @env_vars = {
+      "ZK_URL" => @zk_url,
+      "DATABASE_URL" => "postgresql://#{@pg_user}:#{@pg_pass}@#{@pg_host}:#{@pg_port}/#{@pg_db}?pool=#{connection_pool_value}",
+      "RACK_ENV" => @environment,
+      "PRELOAD_WORKFLOWS" => @preload_workflows
+    }
   end
 
   private
@@ -50,6 +52,19 @@ module CellectEnv
       @pg_user = ENV['PG_ENV_PG_USER']
       @pg_pass = ENV['PG_ENV_PASS']
       @pg_pool = ENV['PG_ENV_POOL']
+    end
+  end
+
+  def default_conn_pool_size
+    @default_conn_pool_size ||= 8
+  end
+
+  def connection_pool_value
+    pool_val = (@pg_pool).to_s
+    if ['', '0'].include?(pool_val)
+      default_conn_pool_size
+    else
+      pool_val
     end
   end
 
