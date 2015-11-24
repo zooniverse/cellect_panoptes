@@ -1,5 +1,3 @@
-require 'active_record'
-
 module Cellect
   module Server
     module Adapters
@@ -25,8 +23,8 @@ module Cellect
 
         def workflow_list(*names)
           workflow_data = PanoptesAssociation::Workflow
-          .select(:id, :prioritized, :pairwise, :grouped)
-          .where(id: names)
+            .select(:id, :prioritized, :pairwise, :grouped)
+            .where(id: names)
 
           workflow_data.map do |row|
             {
@@ -41,8 +39,8 @@ module Cellect
 
         def load_data_for(workflow_name)
           subject_data = PanoptesAssociation::SetMemberSubject.joins(:subject_set)
-          .where(subject_sets: { workflow_id: workflow_name }, state: 0)
-          .select(:subject_id, :priority, :subject_set_id)
+            .where(subject_sets: { workflow_id: workflow_name }, state: 0)
+            .select(:subject_id, :priority, :subject_set_id)
 
           subject_data.map do |row|
             {
@@ -55,8 +53,8 @@ module Cellect
 
         def load_user(workflow_name, user_id)
           subject_ids = PanoptesAssociation::UserSeenSubject
-          .where(workflow_id: workflow_name, user_id: user_id)
-          .pluck(:subject_ids)
+            .where(workflow_id: workflow_name, user_id: user_id)
+            .pluck(:subject_ids)
           subject_ids.flatten!
         end
       end
