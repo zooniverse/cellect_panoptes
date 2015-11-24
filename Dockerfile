@@ -18,8 +18,7 @@ ADD . /cellect_panoptes
 
 ADD supervisord.conf /etc/supervisor/conf.d/cellect.conf
 
-RUN bundle install
-#--without development
+RUN bundle install --without development test
 RUN chmod +x /cellect_panoptes/start
 
 EXPOSE 80
