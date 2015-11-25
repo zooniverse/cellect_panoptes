@@ -3,16 +3,26 @@ module Cellect
     module Adapters
       module PanoptesAssociation
         class Workflow < ActiveRecord::Base
-          has_many :subject_sets
+          has_many :subject_sets_workflows
+          has_many :subject_sets, through: :subject_sets_workflows
+        end
+
+        class SubjectSetsWorkflow < ActiveRecord::Base
+          belongs_to :workflow
+          belongs_to :subject_set
         end
 
         class SubjectSet < ActiveRecord::Base
-          belongs_to :workflow
+          has_many :subject_sets_workflows
+          has_many :workflows, through: :subject_sets_workflows
           has_many :set_member_subjects
+          has_many :subjects, through: :set_member_subjects
         end
 
         class SetMemberSubject < ActiveRecord::Base
           belongs_to :subject_set
+          belongs_to :subject
+          has_many :workflows, through: :subject_set
         end
 
         class UserSeenSubject < ActiveRecord::Base
@@ -37,9 +47,10 @@ module Cellect
           end
         end
 
-        def load_data_for(workflow_name)
-          subject_data = PanoptesAssociation::SetMemberSubject.joins(:subject_set)
-            .where(subject_sets: { workflow_id: workflow_name }, state: 0)
+        def load_data_for(workflow_id)
+          subject_data = PanoptesAssociation::SetMemberSubject
+            .joins(:workflows => :subject_sets_workflows)
+            .where("workflows.id" => workflow_id)
             .select(:subject_id, :priority, :subject_set_id)
 
           subject_data.map do |row|
