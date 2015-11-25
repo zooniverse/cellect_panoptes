@@ -59,9 +59,9 @@ module CellectEnv
       @pg_host = ENV['PG_PORT_5432_TCP_ADDR']
       @pg_port = ENV['PG_PORT_5432_TCP_PORT']
       @pg_db = ENV['PG_ENV_DB']
+      @pg_pool = ENV['PG_ENV_POOL']
       @pg_user = ENV['PG_ENV_POSTGRES_USER']
       @pg_pass = ENV['PG_ENV_POSTGRES_PASSWORD']
-      @pg_pool = ENV['PG_ENV_POSTGRES_POOL']
     end
   end
 
