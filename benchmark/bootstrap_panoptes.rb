@@ -33,45 +33,53 @@ class BootstrapPanoptes
     @pg.exec <<-SQL
       DROP TABLE IF EXISTS workflows;
       CREATE TABLE workflows (
-        "id" SERIAL NOT NULL,
-        "display_name" varchar(255) NOT NULL,
-        "project_id" int NOT NULL,
-        "grouped" boolean DEFAULT FALSE,
-        "prioritized" boolean DEFAULT FALSE,
-        "pairwise" boolean DEFAULT FALSE,
-        "classification_count" int DEFAULT 0,
-        PRIMARY KEY ("id")
+        id SERIAL NOT NULL,
+        display_name character varying(255),
+        project_id integer,
+        grouped boolean NOT NULL DEFAULT false,
+        prioritized boolean NOT NULL DEFAULT false,
+        pairwise boolean NOT NULL DEFAULT false,
+        classifications_count integer NOT NULL DEFAULT 0,
+        CONSTRAINT workflows_pkey PRIMARY KEY (id)
       );
 
       DROP TABLE IF EXISTS subject_sets;
       CREATE TABLE subject_sets (
-        "id" SERIAL NOT NULL,
-        "display_name" varchar(255) NOT NULL,
-        "project_id" int NOT NULL,
-        "workflow_id" int NOT NULL,
-        "retirement" json DEFAULT '{ "criteria": "classification_count", "options": { "count": "15" } }',
-        "set_member_subjects_count" int DEFAULT 0,
-        PRIMARY KEY ("id")
+        id serial NOT NULL,
+        display_name character varying(255),
+        project_id integer,
+        set_member_subjects_count integer NOT NULL DEFAULT 0,
+        CONSTRAINT subject_sets_pkey PRIMARY KEY (id)
       );
 
+      DROP TABLE IF EXISTS subject_sets_workflows;
+      CREATE TABLE subject_sets_workflows
+      (
+        id serial NOT NULL,
+        workflow_id integer,
+        subject_set_id integer,
+        CONSTRAINT subject_sets_workflows_pkey PRIMARY KEY (id)
+      );
+
+
       DROP TABLE IF EXISTS set_member_subjects;
-      CREATE TABLE set_member_subjects (
-        "id" SERIAL NOT NULL,
-        "subject_set_id" int DEFAULT NULL,
-        "subject_id" int DEFAULT NULL,
-        "priority" decimal NOT NULL DEFAULT 0.0,
-        "state" int DEFAULT 0,
-        "classification_count" int DEFAULT 0,
-        PRIMARY KEY ("id")
+      CREATE TABLE set_member_subjects
+      (
+        id serial NOT NULL,
+        subject_set_id integer,
+        subject_id integer,
+        priority numeric,
+        random numeric NOT NULL,
+        CONSTRAINT set_member_subjects_pkey PRIMARY KEY (id)
       );
 
       DROP TABLE IF EXISTS user_seen_subjects;
       CREATE TABLE user_seen_subjects (
-        "id" SERIAL NOT NULL,
-        "subject_ids" int[] NOT NULL,
-        "workflow_id" int DEFAULT NULL,
-        "user_id" int NOT NULL,
-        PRIMARY KEY ("id")
+        id serial NOT NULL,
+        user_id integer,
+        workflow_id integer,
+        subject_ids integer[] NOT NULL DEFAULT '{}'::integer[],
+        CONSTRAINT user_seen_subjects_pkey PRIMARY KEY (id)
       );
     SQL
   end
