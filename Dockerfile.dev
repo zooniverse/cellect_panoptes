@@ -30,6 +30,4 @@ EXPOSE 80
 
 VOLUME /cellect_panoptes/log
 
-ENTRYPOINT [ "/bin/bash" ]
-CMD ["bundle exec ./cellect_start]
-#/bin/bash bundle exec ./cellect_start
+ENTRYPOINT [ "/usr/bin/supervisord" ]
