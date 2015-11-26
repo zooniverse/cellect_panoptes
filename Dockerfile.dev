@@ -28,6 +28,4 @@ RUN chmod +x /cellect_panoptes/cellect_start
 
 EXPOSE 80
 
-VOLUME /cellect_panoptes/log
-
 ENTRYPOINT [ "/usr/bin/supervisord" ]
