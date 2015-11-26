@@ -10,7 +10,10 @@ gem "cellect-server", '~> 0.1.3'
 gem 'newrelic_rpm', '~> 3.14'
 gem 'grape-activerecord', '~> 1.0'
 
-group :development do
-  gem "rspec"
+group :development, :test do
   gem "pry"
+end
+
+group :test do
+  gem "rspec"
 end
