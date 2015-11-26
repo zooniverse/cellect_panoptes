@@ -66,7 +66,7 @@ module CellectEnv
   end
 
   def default_conn_pool_size
-    @default_conn_pool_size ||= 8
+    @default_conn_pool_size ||= 16
   end
 
   def connection_pool_value
