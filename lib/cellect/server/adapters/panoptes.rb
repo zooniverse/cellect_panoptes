@@ -49,8 +49,10 @@ module Cellect
 
         def load_data_for(workflow_id)
           subject_data = PanoptesAssociation::SetMemberSubject
-            .joins(:workflows => :subject_sets_workflows)
-            .where("workflows.id" => workflow_id)
+            .joins(:workflows)
+            .where(workflows: {id: workflow_id})
+            .joins("LEFT OUTER JOIN subject_workflow_counts ON subject_workflow_counts.subject_id = set_member_subjects.subject_id")
+            .where('subject_workflow_counts.id IS NULL OR subject_workflow_counts.retired_at IS NULL')
             .select(:subject_id, :priority, :subject_set_id)
 
           subject_data.map do |row|
