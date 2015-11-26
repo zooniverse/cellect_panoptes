@@ -7,6 +7,8 @@ postgres:
     - "DB=panoptes_development"
   ports:
     - "6000:5432"
+  volumes:
+    - ./tmp/:/tmp
 
 zookeeper:
   image: zooniverse/zookeeper

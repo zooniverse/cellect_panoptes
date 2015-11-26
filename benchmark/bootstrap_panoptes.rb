@@ -84,31 +84,31 @@ class BootstrapPanoptes
     puts 'loading workflows...'
     @pg.exec <<-SQL
       COPY workflows(id,display_name,project_id,grouped,prioritized,pairwise,classifications_count)
-        FROM '#{FILE_PREFIX}/workflows.csv' DELIMITER ',' NULL AS 'NULL' CSV;
+        FROM '/#{FILE_PREFIX}/workflows.csv' DELIMITER ',' NULL AS 'NULL' CSV;
     SQL
 
     puts 'loading subject_sets...'
     @pg.exec <<-SQL
       COPY subject_sets(id,display_name,project_id,set_member_subjects_count)
-        FROM '#{FILE_PREFIX}/subject_sets.csv' DELIMITER ',' NULL AS 'NULL' CSV;
+        FROM '/#{FILE_PREFIX}/subject_sets.csv' DELIMITER ',' NULL AS 'NULL' CSV;
     SQL
 
     puts 'loading subject_sets_workflows...'
     @pg.exec <<-SQL
       COPY subject_sets_workflows(id,workflow_id,subject_set_id)
-        FROM '#{FILE_PREFIX}/subject_sets_workflows.csv' DELIMITER ',' NULL AS 'NULL' CSV;
+        FROM '/#{FILE_PREFIX}/subject_sets_workflows.csv' DELIMITER ',' NULL AS 'NULL' CSV;
     SQL
 
     puts 'loading set_member_subjects...'
     @pg.exec <<-SQL
       COPY set_member_subjects(id,subject_set_id,subject_id,priority,random)
-        FROM '#{FILE_PREFIX}/set_member_subjects.csv' DELIMITER ',' NULL AS 'NULL' CSV;
+        FROM '/#{FILE_PREFIX}/set_member_subjects.csv' DELIMITER ',' NULL AS 'NULL' CSV;
     SQL
 
     puts 'loading user_seen_subjects...'
     @pg.exec <<-SQL
       COPY user_seen_subjects(id,subject_ids,workflow_id,user_id)
-          FROM '#{FILE_PREFIX}/user_seen_subjects.csv' DELIMITER ',' NULL AS 'NULL' CSV;
+          FROM '/#{FILE_PREFIX}/user_seen_subjects.csv' DELIMITER ',' NULL AS 'NULL' CSV;
     SQL
 
     puts 'creating indexes...'
