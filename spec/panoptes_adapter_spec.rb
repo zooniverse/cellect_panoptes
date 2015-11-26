@@ -9,6 +9,7 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
 
   let(:workflow_class) { Cellect::Server::Adapters::PanoptesAssociation::Workflow }
   let(:set_class) { Cellect::Server::Adapters::PanoptesAssociation::SubjectSet}
+  let(:set_workflow_join_class) { Cellect::Server::Adapters::PanoptesAssociation::SubjectSetsWorkflow}
   let(:subject_class) { Cellect::Server::Adapters::PanoptesAssociation::SetMemberSubject }
   let(:uss_class) { Cellect::Server::Adapters::PanoptesAssociation::UserSeenSubject }
 
@@ -28,23 +29,31 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
      [w1, w2]
   end
 
+  let(:loaded_workflow) { workflows.sample }
+
   let(:subjects) do
     subject_set = set_class.create! do |set|
-      set.workflow_id = 1
+      set.display_name = "The Set"
+      set.project_id = 1
+    end
+
+    ss_workflow = set_workflow_join_class.create! do |ssw|
+      ssw.subject_set_id = subject_set.id
+      ssw.workflow_id = loaded_workflow.id
     end
 
     s1 = subject_class.create! do |s|
        s.subject_set_id = subject_set.id
        s.subject_id = 1
-       s.state = 0
        s.priority = 1.234123
+       s.random = rand
      end
 
      s2 = subject_class.create! do |s|
        s.subject_set_id = subject_set.id
        s.subject_id = 2
-       s.state = 1
        s.priority = 1.234123
+       s.random = rand
      end
 
      [s1, s2]
@@ -53,6 +62,7 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
   after(:each) do
     workflow_class.destroy_all
     set_class.destroy_all
+    set_workflow_join_class.destroy_all
     subject_class.destroy_all
     uss_class.destroy_all
   end
@@ -120,9 +130,13 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
   describe '#load_data_for' do
     it 'should subject data for the given workflow' do
       active_sub = subjects.first
-      expect(subject.load_data_for(1)).to include("id" => active_sub.subject_id,
-                                                  "priority" => active_sub.priority,
-                                                  "group_id" => active_sub.subject_set_id)
+      matches = {
+        "id" => active_sub.subject_id,
+        "priority" => active_sub.priority,
+        "group_id" => active_sub.subject_set_id
+      }
+      data = subject.load_data_for(loaded_workflow.id)
+      expect(data).to include(matches)
     end
   end
 
