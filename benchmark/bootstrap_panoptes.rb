@@ -22,74 +22,18 @@ class BootstrapPanoptes
     setup_env_vars
   end
 
-  def create_db_schema
-    connect_to_pg
-    @pg.exec <<-SQL
-      DROP TABLE IF EXISTS workflows;
-      CREATE TABLE workflows (
-        id SERIAL NOT NULL,
-        display_name character varying(255),
-        project_id integer,
-        grouped boolean NOT NULL DEFAULT false,
-        prioritized boolean NOT NULL DEFAULT false,
-        pairwise boolean NOT NULL DEFAULT false,
-        classifications_count integer NOT NULL DEFAULT 0,
-        CONSTRAINT workflows_pkey PRIMARY KEY (id)
-      );
-
-      DROP TABLE IF EXISTS subject_sets;
-      CREATE TABLE subject_sets (
-        id serial NOT NULL,
-        display_name character varying(255),
-        project_id integer,
-        set_member_subjects_count integer NOT NULL DEFAULT 0,
-        CONSTRAINT subject_sets_pkey PRIMARY KEY (id)
-      );
-
-      DROP TABLE IF EXISTS subject_sets_workflows;
-      CREATE TABLE subject_sets_workflows
-      (
-        id serial NOT NULL,
-        workflow_id integer,
-        subject_set_id integer,
-        CONSTRAINT subject_sets_workflows_pkey PRIMARY KEY (id)
-      );
-
-
-      DROP TABLE IF EXISTS set_member_subjects;
-      CREATE TABLE set_member_subjects
-      (
-        id serial NOT NULL,
-        subject_set_id integer,
-        subject_id integer,
-        priority numeric,
-        random numeric NOT NULL,
-        CONSTRAINT set_member_subjects_pkey PRIMARY KEY (id)
-      );
-
-      DROP TABLE IF EXISTS user_seen_subjects;
-      CREATE TABLE user_seen_subjects (
-        id serial NOT NULL,
-        user_id integer,
-        workflow_id integer,
-        subject_ids integer[] NOT NULL DEFAULT '{}'::integer[],
-        CONSTRAINT user_seen_subjects_pkey PRIMARY KEY (id)
-      );
-    SQL
-  end
-
   def load_csv_data
     connect_to_pg
 
     puts 'loading workflows...'
     @pg.exec <<-SQL
-      COPY workflows(id,display_name,project_id,grouped,prioritized,pairwise,classifications_count)
+      COPY workflows(id,display_name,project_id,grouped,prioritized,pairwise,classifications_count,updated_at,created_at)
         FROM '/#{FILE_PREFIX}/workflows.csv' DELIMITER ',' NULL AS 'NULL' CSV;
     SQL
 
     puts 'loading subject_sets...'
     @pg.exec <<-SQL
-      COPY subject_sets(id,display_name,project_id,set_member_subjects_count)
+      COPY subject_sets(id,display_name,project_id,set_member_subjects_count,updated_at,created_at)
         FROM '/#{FILE_PREFIX}/subject_sets.csv' DELIMITER ',' NULL AS 'NULL' CSV;
     SQL
 
@@ -101,13 +45,13 @@ class BootstrapPanoptes
 
     puts 'loading set_member_subjects...'
     @pg.exec <<-SQL
-      COPY set_member_subjects(id,subject_set_id,subject_id,priority,random)
+      COPY set_member_subjects(id,subject_set_id,subject_id,priority,random,updated_at,created_at)
         FROM '/#{FILE_PREFIX}/set_member_subjects.csv' DELIMITER ',' NULL AS 'NULL' CSV;
     SQL
 
     puts 'loading user_seen_subjects...'
     @pg.exec <<-SQL
-      COPY user_seen_subjects(id,subject_ids,workflow_id,user_id)
+      COPY user_seen_subjects(id,subject_ids,workflow_id,user_id,updated_at,created_at)
           FROM '/#{FILE_PREFIX}/user_seen_subjects.csv' DELIMITER ',' NULL AS 'NULL' CSV;
     SQL
 
@@ -133,11 +77,13 @@ class BootstrapPanoptes
     puts "Creating synthetic CSV data files\n"
 
     puts "Creating workflow data file\n"
-    workflow = [1, "Stargazing Workflow", PROJECT_ID, false, true, false, 0]
+    tstamps = DateTime.now
+    workflow = [1,"Stargazing Workflow",PROJECT_ID,false,true,false,0,tstamps,tstamps]
     CSV.open("#{FILE_PREFIX}/workflows.csv", "wb") { |csv| csv << workflow }
 
     puts "Creating subject_set data file\n"
-    subject_set = [1, "Stargazing", PROJECT_ID, SUBJECT_DIST]
+    tstamps = DateTime.now
+    subject_set = [1,"Stargazing",PROJECT_ID,SUBJECT_DIST,tstamps,tstamps]
     CSV.open("#{FILE_PREFIX}/subject_sets.csv", "wb") { |csv| csv << subject_set }
 
     puts "Creating subject_set_workflows data file\n"
@@ -145,13 +91,13 @@ class BootstrapPanoptes
     CSV.open("#{FILE_PREFIX}/subject_sets_workflows.csv", "wb") { |csv| csv << subject_set_workflow }
 
     puts "Creating set_member_subjects data file\n"
-    set_member_subjects = []
-    1.upto(SUBJECT_DIST).each do |subject_id|
-      subject_priority = priority_for_data_import(subject_id)
-      set_member_subjects << [subject_id, 1, subject_id, subject_priority, rand]
-    end
+
     CSV.open("#{FILE_PREFIX}/set_member_subjects.csv", "wb") do |csv|
-      set_member_subjects.each { |sms_row| csv << sms_row }
+      1.upto(SUBJECT_DIST).each do |subject_id|
+        subject_priority = priority_for_data_import(subject_id)
+        tstamps = DateTime.now
+        csv << [subject_id,1,subject_id,subject_priority,rand,tstamps,tstamps]
+      end
     end
 
     puts "Creating user_seen_subjects data file\n"
@@ -202,7 +148,8 @@ class BootstrapPanoptes
         seen_count = user_seen_range[0] + rand(user_seen_range[1])
         seen_id = subject_ids.sample
         user_id = uss_id
-        user_seen_subjects << [uss_id_offset, "\"{#{ seen_id }}\"", WORKFLOW_ID, user_id]
+        tstamps = DateTime.now
+        user_seen_subjects << [uss_id_offset, "\"{#{ seen_id }}\"", WORKFLOW_ID, user_id, tstamps, tstamps]
         uss_id_offset += 1
       end
     end
@@ -212,7 +159,8 @@ class BootstrapPanoptes
     subject_ids.sample(percent_complete).each do |subject_id|
       long_tail_user_ids = stargazing_user_ids.sample(long_tail_user_count)
       (POWER_USER_IDS | long_tail_user_ids).each do |user_id|
-        user_seen_subjects << [uss_id_offset, "\"{#{ subject_id }}\"", WORKFLOW_ID, user_id]
+        tstamps = DateTime.now
+        user_seen_subjects << [uss_id_offset, "\"{#{ subject_id }}\"", WORKFLOW_ID, user_id, tstamps, tstamps]
         uss_id_offset += 1
       end
     end
