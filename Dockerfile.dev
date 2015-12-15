@@ -11,7 +11,7 @@ ENV LC_ALL en_US.UTF-8
 RUN apt-get update && \
     apt-get -y upgrade && \
     apt-get install -y --no-install-recommends autoconf automake \
-        libboost-all-dev libffi-dev git-core supervisor && \
+        libboost-all-dev libffi-dev git-core supervisor curl && \
     apt-get autoremove && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
