@@ -32,9 +32,11 @@ module Cellect
       class Panoptes < Default
 
         def workflow_list(*names)
-          workflow_data = PanoptesAssociation::Workflow
-            .select(:id, :prioritized, :pairwise, :grouped)
-            .where(id: names)
+          workflow_data = with_connection do
+            PanoptesAssociation::Workflow
+              .select(:id, :prioritized, :pairwise, :grouped)
+              .where(id: names)
+          end
 
           workflow_data.map do |row|
             {
@@ -48,12 +50,14 @@ module Cellect
         end
 
         def load_data_for(workflow_id)
-          subject_data = PanoptesAssociation::SetMemberSubject
-            .joins(:workflows)
-            .where(workflows: {id: workflow_id})
-            .joins("LEFT OUTER JOIN subject_workflow_counts ON subject_workflow_counts.subject_id = set_member_subjects.subject_id")
-            .where('subject_workflow_counts.id IS NULL OR subject_workflow_counts.retired_at IS NULL')
-            .select(:subject_id, :priority, :subject_set_id)
+          subject_data = with_connection do
+            PanoptesAssociation::SetMemberSubject
+              .joins(:workflows)
+              .where(workflows: {id: workflow_id})
+              .joins("LEFT OUTER JOIN subject_workflow_counts ON subject_workflow_counts.subject_id = set_member_subjects.subject_id")
+              .where('subject_workflow_counts.id IS NULL OR subject_workflow_counts.retired_at IS NULL')
+              .select(:subject_id, :priority, :subject_set_id)
+          end
 
           subject_data.map do |row|
             {
@@ -65,10 +69,16 @@ module Cellect
         end
 
         def load_user(workflow_name, user_id)
-          subject_ids = PanoptesAssociation::UserSeenSubject
-            .where(workflow_id: workflow_name, user_id: user_id)
-            .pluck(:subject_ids)
-          subject_ids.flatten!
+          with_connection do
+            subject_ids = PanoptesAssociation::UserSeenSubject
+              .where(workflow_id: workflow_name, user_id: user_id)
+              .pluck(:subject_ids)
+            subject_ids.flatten!
+          end
+        end
+
+        def with_connection(&block)
+          ActiveRecord::Base.connection_pool.with_connection &block
         end
       end
     end
