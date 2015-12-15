@@ -2,6 +2,7 @@
 require_relative '../cellect_env'
 require 'pg'
 require 'csv'
+require "fileutils"
 
 class BootstrapPanoptes
   include CellectEnv
