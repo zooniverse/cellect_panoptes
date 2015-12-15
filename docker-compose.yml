@@ -1,0 +1,33 @@
+postgres:
+  image: postgres
+  environment:
+    - "POSTGRES_USER=panoptes"
+    - "POSTGRES_PASSWORD=panoptes"
+    - "POOL=16"
+    - "DB=panoptes_development"
+  ports:
+    - "6000:5432"
+  volumes:
+    - ./tmp/:/tmp
+
+zookeeper:
+  image: zooniverse/zookeeper
+  command: /usr/share/zookeeper/bin/zkServer.sh start-foreground -c localhost:2888:3888 -i 1
+
+cellect:
+  build: .
+  dockerfile: Dockerfile.dev
+  volumes:
+    - ./:/cellect_panoptes
+  ports:
+    - "4000:4000"
+  environment:
+    - "RACK_ENV=development"
+    - "DEBUG_CELLECT_START=true"
+    - "PUMA_MAX_THREADS=16"
+    # use the database url to override the dd connection, e.g. to hit another server
+    - "DATABASE_URL=postgresql://panoptes:panoptes@pg:5432/panoptes_development?pool=16"
+    # - "PRELOAD_WORKFLOWS=1"
+  links:
+    - postgres:pg
+    - zookeeper:zk

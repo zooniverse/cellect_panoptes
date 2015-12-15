@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+
 require_relative 'cellect_env'
 require 'fileutils'
 
@@ -22,7 +23,11 @@ class CellectStart
   private
 
   def setup_puma_cmd
-    @puma_cmd = "puma -b tcp://0.0.0.0:80 -t 0:#{puma_max_threads}"
+    @puma_cmd = "puma -b tcp://0.0.0.0:#{puma_port} -t 0:#{puma_max_threads}"
+  end
+
+  def puma_port
+    ENV['RACK_ENV'] == "production" ? 80 : 4000
   end
 
   def puma_max_threads
@@ -45,6 +50,5 @@ class CellectStart
     p e.message
   end
 end
-
 
 CellectStart.new.run

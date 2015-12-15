@@ -13,10 +13,12 @@ module CellectEnv
     preload_workflows
     load_db_yaml
     load_zk_yaml
-    @env_vars = { "ZK_URL" => @zk_url, "PG_POOL" => stringify_value(@pg_pool),
-                  "PG_HOST" => @pg_host, "PG_PORT" => stringify_value(@pg_port),
-                  "PG_DB" => @pg_db, "PG_USER" => @pg_user, "PG_PASS" => @pg_pass,
-                  "RACK_ENV" => @environment, "PRELOAD_WORKFLOWS" => @preload_workflows }
+    @env_vars = {
+      "ZK_URL" => @zk_url,
+      "DATABASE_URL" => database_url,
+      "RACK_ENV" => @environment,
+      "PRELOAD_WORKFLOWS" => @preload_workflows
+    }
   end
 
   private
@@ -33,6 +35,16 @@ module CellectEnv
     @preload_workflows = ids.map(&:to_i).select { |int| int != 0 }.join(",")
   end
 
+  def load_zk_yaml
+    begin
+      zookeepers = YAML.load(File.read("/production_config/zookeeper.yml"))
+      zk = zookeepers[@environment]
+      @zk_url = zk['url']
+    rescue Errno::ENOENT
+      @zk_url = zk_url
+    end
+  end
+
   def load_db_yaml
     begin
       databases = YAML.load(File.read("/production_config/database.yml"))
@@ -47,19 +59,32 @@ module CellectEnv
       @pg_host = ENV['PG_PORT_5432_TCP_ADDR']
       @pg_port = ENV['PG_PORT_5432_TCP_PORT']
       @pg_db = ENV['PG_ENV_DB']
-      @pg_user = ENV['PG_ENV_PG_USER']
-      @pg_pass = ENV['PG_ENV_PASS']
       @pg_pool = ENV['PG_ENV_POOL']
+      @pg_user = ENV['PG_ENV_POSTGRES_USER']
+      @pg_pass = ENV['PG_ENV_POSTGRES_PASSWORD']
     end
   end
 
-  def load_zk_yaml
-    begin
-      zookeepers = YAML.load(File.read("/production_config/zookeeper.yml"))
-      zk = zookeepers[@environment]
-      @zk_url = zk['url']
-    rescue Errno::ENOENT
-      @zk_url = "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
+  def default_conn_pool_size
+    @default_conn_pool_size ||= 16
+  end
+
+  def connection_pool_value
+    pool_val = (@pg_pool).to_s
+    if ['', '0'].include?(pool_val)
+      default_conn_pool_size
+    else
+      pool_val
     end
+  end
+
+  def database_url
+    ENV['DATABASE_URL'] ||
+    "postgresql://#{@pg_user}:#{@pg_pass}@#{@pg_host}:#{@pg_port}/#{@pg_db}?pool=#{connection_pool_value}"
+  end
+
+  def zk_url
+    ENV['ZK_URL'] ||
+    "#{ENV["ZK_PORT_2181_TCP_ADDR"]}:#{ENV["ZK_PORT_2181_TCP_PORT"]}"
   end
 end

@@ -2,6 +2,7 @@
 require_relative '../cellect_env'
 require 'pg'
 require 'csv'
+require "fileutils"
 
 class BootstrapPanoptes
   include CellectEnv
@@ -22,75 +23,44 @@ class BootstrapPanoptes
     setup_env_vars
   end
 
-  def create_csv_data
-    create_subjects_and_subject_set_csv_data
-    create_workflow
-    create_user_seen_subjects
-  end
-
-  def create_db_schema
-    connect_to_pg
-    @pg.exec <<-SQL
-      DROP TABLE IF EXISTS workflows;
-      CREATE TABLE workflows (
-        "id" SERIAL NOT NULL,
-        "display_name" varchar(255) NOT NULL,
-        "project_id" int NOT NULL,
-        "grouped" boolean DEFAULT FALSE,
-        "prioritized" boolean DEFAULT FALSE,
-        "pairwise" boolean DEFAULT FALSE,
-        "classification_count" int DEFAULT 0,
-        PRIMARY KEY ("id")
-      );
-
-      DROP TABLE IF EXISTS subject_sets;
-      CREATE TABLE subject_sets (
-        "id" SERIAL NOT NULL,
-        "display_name" varchar(255) NOT NULL,
-        "project_id" int NOT NULL,
-        "workflow_id" int NOT NULL,
-        "retirement" json DEFAULT '{ "criteria": "classification_count", "options": { "count": "15" } }',
-        "set_member_subjects_count" int DEFAULT 0,
-        PRIMARY KEY ("id")
-      );
-
-      DROP TABLE IF EXISTS set_member_subjects;
-      CREATE TABLE set_member_subjects (
-        "id" SERIAL NOT NULL,
-        "subject_set_id" int DEFAULT NULL,
-        "subject_id" int DEFAULT NULL,
-        "priority" decimal NOT NULL DEFAULT 0.0,
-        "state" int DEFAULT 0,
-        "classification_count" int DEFAULT 0,
-        PRIMARY KEY ("id")
-      );
-
-      DROP TABLE IF EXISTS user_seen_subjects;
-      CREATE TABLE user_seen_subjects (
-        "id" SERIAL NOT NULL,
-        "subject_ids" int[] NOT NULL,
-        "workflow_id" int DEFAULT NULL,
-        "user_id" int NOT NULL,
-        PRIMARY KEY ("id")
-      );
-    SQL
-  end
-
   def load_csv_data
     connect_to_pg
-    @pg.exec <<-SQL
-      COPY workflows(id,display_name,project_id,grouped,prioritized,pairwise,classification_count)
-        FROM '/#{FILE_PREFIX}/workflows.csv' DELIMITER ',' NULL AS 'NULL' CSV;
-      COPY subject_sets(id,display_name,project_id,workflow_id,set_member_subjects_count)
-        FROM '/#{FILE_PREFIX}/subject_sets.csv' DELIMITER ',' NULL AS 'NULL' CSV;
-      COPY set_member_subjects(id,subject_set_id,subject_id,priority,state,classification_count)
-        FROM '/#{FILE_PREFIX}/set_member_subjects.csv' DELIMITER ',' NULL AS 'NULL' CSV;
-      COPY user_seen_subjects(id,subject_ids,workflow_id,user_id)
-          FROM '/#{FILE_PREFIX}/user_seen_subjects.csv' DELIMITER ',' NULL AS 'NULL' CSV;
 
+    puts 'loading workflows...'
+    @pg.exec <<-SQL
+      COPY workflows(id,display_name,project_id,grouped,prioritized,pairwise,classifications_count,updated_at,created_at)
+        FROM '/#{FILE_PREFIX}/workflows.csv' DELIMITER ',' NULL AS 'NULL' CSV;
+    SQL
+
+    puts 'loading subject_sets...'
+    @pg.exec <<-SQL
+      COPY subject_sets(id,display_name,project_id,set_member_subjects_count,updated_at,created_at)
+        FROM '/#{FILE_PREFIX}/subject_sets.csv' DELIMITER ',' NULL AS 'NULL' CSV;
+    SQL
+
+    puts 'loading subject_sets_workflows...'
+    @pg.exec <<-SQL
+      COPY subject_sets_workflows(id,workflow_id,subject_set_id)
+        FROM '/#{FILE_PREFIX}/subject_sets_workflows.csv' DELIMITER ',' NULL AS 'NULL' CSV;
+    SQL
+
+    puts 'loading set_member_subjects...'
+    @pg.exec <<-SQL
+      COPY set_member_subjects(id,subject_set_id,subject_id,priority,random,updated_at,created_at)
+        FROM '/#{FILE_PREFIX}/set_member_subjects.csv' DELIMITER ',' NULL AS 'NULL' CSV;
+    SQL
+
+    puts 'loading user_seen_subjects...'
+    @pg.exec <<-SQL
+      COPY user_seen_subjects(id,subject_ids,workflow_id,user_id,updated_at,created_at)
+          FROM '/#{FILE_PREFIX}/user_seen_subjects.csv' DELIMITER ',' NULL AS 'NULL' CSV;
+    SQL
+
+    puts 'creating indexes...'
+    @pg.exec <<-SQL
       CREATE INDEX index_workflows_on_project_id ON workflows(project_id);
-      CREATE INDEX index_subject_sets_on_workflow_id ON subject_sets(workflow_id);
       CREATE INDEX index_subject_sets_on_project_id ON subject_sets(project_id);
+      CREATE INDEX index_subject_sets_on_subject_set_id_and_workflow_id ON subject_sets_workflows(subject_set_id, workflow_id);
       CREATE INDEX index_set_member_subjects_on_subject_id ON set_member_subjects(subject_id);
       CREATE INDEX index_set_member_subjects_on_subject_set_id ON set_member_subjects(subject_set_id);
       CREATE INDEX index_user_seen_subjects_on_user_id_and_workflow_id ON user_seen_subjects(user_id, workflow_id);
@@ -99,8 +69,44 @@ class BootstrapPanoptes
   end
 
   def list_csv_data
-    csv_files = File.join("tmp/**/*")
+    csv_files = File.join("#{ DATA_DIR }/**/*")
     p Dir.glob(csv_files)
+  end
+
+  def create_csv_data
+    setup_csv_output_dir
+    puts "Creating synthetic CSV data files\n"
+
+    puts "Creating workflow data file\n"
+    tstamps = DateTime.now
+    workflow = [1,"Stargazing Workflow",PROJECT_ID,false,true,false,0,tstamps,tstamps]
+    CSV.open("#{FILE_PREFIX}/workflows.csv", "wb") { |csv| csv << workflow }
+
+    puts "Creating subject_set data file\n"
+    tstamps = DateTime.now
+    subject_set = [1,"Stargazing",PROJECT_ID,SUBJECT_DIST,tstamps,tstamps]
+    CSV.open("#{FILE_PREFIX}/subject_sets.csv", "wb") { |csv| csv << subject_set }
+
+    puts "Creating subject_set_workflows data file\n"
+    subject_set_workflow = [1, WORKFLOW_ID, subject_set.first]
+    CSV.open("#{FILE_PREFIX}/subject_sets_workflows.csv", "wb") { |csv| csv << subject_set_workflow }
+
+    puts "Creating set_member_subjects data file\n"
+
+    CSV.open("#{FILE_PREFIX}/set_member_subjects.csv", "wb") do |csv|
+      1.upto(SUBJECT_DIST).each do |subject_id|
+        subject_priority = priority_for_data_import(subject_id)
+        tstamps = DateTime.now
+        csv << [subject_id,1,subject_id,subject_priority,rand,tstamps,tstamps]
+      end
+    end
+
+    puts "Creating user_seen_subjects data file\n"
+    user_seen_subjects = create_synthetic_user_seen_data
+
+    CSV.open("#{FILE_PREFIX}/user_seen_subjects.csv", "wb", quote_char: CSV_QUOTE_CHAR) do |csv|
+      user_seen_subjects.each { |uss_row| csv << uss_row }
+    end
   end
 
   private
@@ -109,6 +115,12 @@ class BootstrapPanoptes
     @pg ||= PG.connect host: @pg_host, port: @pg_port,
                        dbname: @pg_db, user: @pg_user,
                        password: @pg_pass
+  end
+
+  def setup_csv_output_dir
+    unless File.directory?(FILE_PREFIX)
+      FileUtils.mkdir_p(FILE_PREFIX)
+    end
   end
 
   def priority_for_data_import(subject_id)
@@ -122,30 +134,7 @@ class BootstrapPanoptes
     end
   end
 
-  def create_subjects_and_subject_set_csv_data
-    puts "Creating subject_set and subjects CSV files\n"
-    subjects = []
-    active_default_state = 0
-    subject_set = [1, "Stargazing", PROJECT_ID, WORKFLOW_ID, SUBJECT_DIST]
-    1.upto(SUBJECT_DIST).each do |subject_id|
-      subject_priority = priority_for_data_import(subject_id)
-      subjects << [subject_id, 1, subject_id, subject_priority, active_default_state,0]
-    end
-
-    CSV.open("#{FILE_PREFIX}/subject_sets.csv", "wb") { |csv| csv << subject_set }
-    CSV.open("#{FILE_PREFIX}/set_member_subjects.csv", "wb") do |csv|
-      subjects.each { |subject_row| csv << subject_row }
-    end
-  end
-
-  def create_workflow
-    puts "Creating workflow CSV file\n"
-    workflow = [1, "Stargazing Workflow", PROJECT_ID, false, true, false, 0]
-    CSV.open("#{FILE_PREFIX}/workflows.csv", "wb") { |csv| csv << workflow }
-  end
-
-  def create_user_seen_subjects
-    puts "Creating user seen subjects CSV file\n"
+  def create_synthetic_user_seen_data
     user_seen_subjects = []
     user_seen_distribution = setup_user_seen_distribution
     subject_ids = (1..SUBJECT_DIST).to_a
@@ -160,24 +149,24 @@ class BootstrapPanoptes
         seen_count = user_seen_range[0] + rand(user_seen_range[1])
         seen_id = subject_ids.sample
         user_id = uss_id
-        user_seen_subjects << [uss_id_offset, "\"{#{ seen_id }}\"", WORKFLOW_ID, user_id]
+        tstamps = DateTime.now
+        user_seen_subjects << [uss_id_offset, "\"{#{ seen_id }}\"", WORKFLOW_ID, user_id, tstamps, tstamps]
         uss_id_offset += 1
       end
     end
 
     #power users and the long tail
     percent_complete = (SUBJECT_DIST * POWER_USER_SET_SIZE).to_i
-    puts "\n\nPower user ids: #{POWER_USER_IDS.join(", ")}\nUse these in your cellect benchmarking.\n"
     subject_ids.sample(percent_complete).each do |subject_id|
       long_tail_user_ids = stargazing_user_ids.sample(long_tail_user_count)
       (POWER_USER_IDS | long_tail_user_ids).each do |user_id|
-        user_seen_subjects << [uss_id_offset, "\"{#{ subject_id }}\"", WORKFLOW_ID, user_id]
+        tstamps = DateTime.now
+        user_seen_subjects << [uss_id_offset, "\"{#{ subject_id }}\"", WORKFLOW_ID, user_id, tstamps, tstamps]
         uss_id_offset += 1
       end
     end
-    CSV.open("#{FILE_PREFIX}/user_seen_subjects.csv", "wb", quote_char: CSV_QUOTE_CHAR) do |csv|
-      user_seen_subjects.each { |uss_row| csv << uss_row }
-    end
+    puts "\n\nPower user ids: #{POWER_USER_IDS.join(", ")}\nUse these in your cellect benchmarking.\n"
+    user_seen_subjects
   end
 
   def setup_user_seen_distribution
