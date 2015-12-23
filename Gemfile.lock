@@ -14,14 +14,14 @@ GEM
       minitest (~> 5.1)
       thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
-    addressable (2.3.8)
+    addressable (2.4.0)
     arel (6.0.3)
     axiom-types (0.1.1)
       descendants_tracker (~> 0.0.4)
       ice_nine (~> 0.11.0)
       thread_safe (~> 0.3, >= 0.3.1)
     builder (3.2.2)
-    cellect-server (0.1.3)
+    cellect-server (1.2.0)
       celluloid (= 0.16.0)
       celluloid-io (= 0.16.0)
       diff_set (~> 0.0.3)
@@ -80,7 +80,7 @@ GEM
     multi_json (1.11.2)
     multi_xml (0.5.5)
     newrelic_rpm (3.14.0.305)
-    nio4r (1.1.1)
+    nio4r (1.2.0)
     oj (2.13.1)
     pg (0.18.4)
     pg_array_parser (0.0.9)
@@ -135,7 +135,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 4.2.5)
-  cellect-server (~> 0.1.3)
+  cellect-server (~> 1.2.0)
   connection_pool (~> 2.2.0)
   grape-activerecord (~> 1.0)
   newrelic_rpm (~> 3.14)
@@ -145,3 +145,6 @@ DEPENDENCIES
   pry
   puma (~> 2.15.3)
   rspec
+
+BUNDLED WITH
+   1.11.2
