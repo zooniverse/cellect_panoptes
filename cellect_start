@@ -17,7 +17,7 @@ class CellectStart
       p @env_vars
       p @puma_cmd
     end
-    exit system(@env_vars, @puma_cmd)
+    exec(@env_vars, @puma_cmd)
   end
 
   private
