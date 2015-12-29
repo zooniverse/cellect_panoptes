@@ -23,7 +23,7 @@ class CellectStart
   private
 
   def setup_puma_cmd
-    @puma_cmd = "puma -b tcp://0.0.0.0:#{puma_port} -t 0:#{puma_max_threads}"
+    @puma_cmd = "puma -b tcp://0.0.0.0:#{puma_port} -t 0:#{puma_max_threads} -C config/puma.rb"
   end
 
   def puma_port
