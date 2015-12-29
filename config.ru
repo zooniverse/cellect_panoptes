@@ -1,6 +1,8 @@
 require 'bundler'
 Bundler.require(:default, ENV['RACK_ENV'])
 
+use Rack::CommonLogger, STDOUT
+
 use ActiveRecord::ConnectionAdapters::ConnectionManagement
 
 Grape::ActiveRecord.database_file = 'config/database.yml'
