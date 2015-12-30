@@ -59,12 +59,12 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
      [s1, s2]
   end
 
-  after(:each) do
-    workflow_class.destroy_all
-    set_class.destroy_all
-    set_workflow_join_class.destroy_all
-    subject_class.destroy_all
+  before(:each) do
     uss_class.destroy_all
+    set_workflow_join_class.destroy_all
+    set_class.destroy_all
+    subject_class.destroy_all
+    workflow_class.destroy_all
   end
 
   describe "ActiveRecord connection" do
@@ -129,14 +129,16 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
 
   describe '#load_data_for' do
     it 'should subject data for the given workflow' do
-      active_sub = subjects.first
-      matches = {
-        "id" => active_sub.subject_id,
-        "priority" => active_sub.priority,
-        "group_id" => active_sub.subject_set_id
-      }
-      data = subject.load_data_for(loaded_workflow.id)
-      expect(data).to include(matches)
+      subjects # not created yet
+      data = subject.load_data_for(loaded_workflow.id).group_by{ |h| h['id'] }
+
+      subjects.each do |panoptes_subject|
+        cellect_subject = data[panoptes_subject.subject_id].first
+        expect(cellect_subject).to be_present
+        expect(cellect_subject['id']).to eql panoptes_subject.subject_id
+        expect(cellect_subject['group_id']).to eql panoptes_subject.subject_set_id
+        expect(cellect_subject['priority']).to be_within(0.1).of 1 / panoptes_subject.priority.to_f
+      end
     end
   end
 

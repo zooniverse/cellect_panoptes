@@ -62,7 +62,7 @@ module Cellect
           subject_data.map do |row|
             {
               'id' => row.subject_id,
-              'priority' => row.priority,
+              'priority' => 1 / (row.priority || 1).to_f,
               'group_id' => row.subject_set_id
             }
           end
