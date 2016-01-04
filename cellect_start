@@ -27,7 +27,7 @@ class CellectStart
   end
 
   def puma_port
-    ENV['RACK_ENV'] == "production" ? 80 : 4000
+    ENV['PUMA_PORT'] || 4000
   end
 
   def puma_max_threads
