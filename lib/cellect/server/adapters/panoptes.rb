@@ -30,6 +30,9 @@ module Cellect
       end
 
       class Panoptes < Default
+        def status
+          { connected: ActiveRecord::Base.connected? }
+        end
 
         def workflow_list(*names)
           workflow_data = with_connection do
