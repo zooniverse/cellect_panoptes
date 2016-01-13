@@ -60,6 +60,7 @@ module Cellect
               .joins("LEFT OUTER JOIN subject_workflow_counts ON subject_workflow_counts.subject_id = set_member_subjects.subject_id")
               .where('subject_workflow_counts.retired_at IS NULL')
               .select(:subject_id, :priority, :subject_set_id)
+              .distinct
           end
 
           subject_data.map do |row|
