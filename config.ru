@@ -18,4 +18,6 @@ workflows_to_load_on_boot.split(",").each do |workflow_id|
   Cellect::Server.adapter.load_workflows(workflow_id)
 end
 
+# Mark this server as active through Redis
+Cellect::Server.connect
 run Cellect::Server::API

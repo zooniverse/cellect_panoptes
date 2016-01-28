@@ -6,7 +6,7 @@ gem "postgres_ext", '~> 2.4.1'
 gem "activerecord", '~> 4.2.5'
 gem "connection_pool", '~> 2.2.0'
 gem "oj", '~> 2.13.1'
-gem "cellect-server", '~> 2.0.0.beta3'
+gem "cellect-server", '~> 2.0.0.beta4'
 gem 'newrelic_rpm', '~> 3.14'
 gem 'grape-activerecord', '~> 1.0'
 

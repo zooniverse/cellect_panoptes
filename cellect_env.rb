@@ -12,7 +12,7 @@ module CellectEnv
     setup_environment
     preload_workflows
     load_db_yaml
-    load_redis_yaml
+    set_redis_url
     @env_vars = {
       "ATTENTION_REDIS_URL" => @redis_url,
       "DATABASE_URL" => database_url,
@@ -35,13 +35,14 @@ module CellectEnv
     @preload_workflows = ids.map(&:to_i).select { |int| int != 0 }.join(",")
   end
 
-  def load_redis_yaml
-    begin
+  def set_redis_url
+    @redis_url = ENV['ATTENTION_REDIS_URL']
+    if File.exists?("/production_config/redis.yml")
       configs = YAML.load(File.read("/production_config/redis.yml"))
       config = configs[@environment]
-      @redis_url = redis['url']
-    rescue Errno::ENOENT
-      @redis_url = redis_url
+      @redis_url ||= redis['url']
+    else
+      @redis_url ||= docker_redis_url
     end
   end
 
@@ -83,8 +84,7 @@ module CellectEnv
     "postgresql://#{@pg_user}:#{@pg_pass}@#{@pg_host}:#{@pg_port}/#{@pg_db}?pool=#{connection_pool_value}"
   end
 
-  def redis_url
-    ENV['ATTENTION_REDIS_URL'] ||
+  def docker_redis_url
     "redis://#{ENV["REDIS_PORT_6379_TCP_ADDR"]}:#{ENV["REDIS_PORT_6379_TCP_PORT"]}/0"
   end
 end
