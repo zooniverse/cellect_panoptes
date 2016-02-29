@@ -2,6 +2,8 @@ require 'yaml'
 
 module CellectEnv
 
+  DEFAULT_REDIS_DB = 1
+
   def stringify_value(value)
     return value if value.nil?
     value = value.to_s
@@ -12,9 +14,9 @@ module CellectEnv
     setup_environment
     preload_workflows
     load_db_yaml
-    set_redis_url
+    load_redis_yaml
     @env_vars = {
-      "ATTENTION_REDIS_URL" => @redis_url,
+      "ATTENTION_REDIS_URL" => redis_url,
       "DATABASE_URL" => database_url,
       "RACK_ENV" => @environment,
       "PRELOAD_WORKFLOWS" => @preload_workflows
@@ -35,35 +37,34 @@ module CellectEnv
     @preload_workflows = ids.map(&:to_i).select { |int| int != 0 }.join(",")
   end
 
-  def set_redis_url
-    @redis_url = ENV['ATTENTION_REDIS_URL']
-    if File.exists?("/production_config/redis.yml")
-      configs = YAML.load(File.read("/production_config/redis.yml"))
-      config = configs[@environment]
-      @redis_url ||= redis['url']
-    else
-      @redis_url ||= docker_redis_url
-    end
+  def load_redis_yaml
+    configs = YAML.load(File.read("/production_config/redis.yml"))
+    config = configs[@environment]
+    @redis_host = config['host']
+    @redis_port = config['port']
+    @redis_db   = config['db'] || DEFAULT_REDIS_DB
+  rescue Errno::ENOENT
+    @redis_host = ENV["REDIS_PORT_6379_TCP_ADDR"]
+    @redis_port = ENV["REDIS_PORT_6379_TCP_PORT"]
+    @redis_db   = ENV["REDIS_ENV_DB"] || DEFAULT_REDIS_DB
   end
 
   def load_db_yaml
-    begin
-      databases = YAML.load(File.read("/production_config/database.yml"))
-      db = databases[@environment]
-      @pg_host = db['host']
-      @pg_port = db['port']
-      @pg_db = db['database']
-      @pg_user = db['username']
-      @pg_pass = db['password']
-      @pg_pool = db['pool']
-    rescue Errno::ENOENT
-      @pg_host = ENV['PG_PORT_5432_TCP_ADDR']
-      @pg_port = ENV['PG_PORT_5432_TCP_PORT']
-      @pg_db = ENV['PG_ENV_DB']
-      @pg_pool = ENV['PG_ENV_POOL']
-      @pg_user = ENV['PG_ENV_POSTGRES_USER']
-      @pg_pass = ENV['PG_ENV_POSTGRES_PASSWORD']
-    end
+    databases = YAML.load(File.read("/production_config/database.yml"))
+    db = databases[@environment]
+    @pg_host = db['host']
+    @pg_port = db['port']
+    @pg_db   = db['database']
+    @pg_user = db['username']
+    @pg_pass = db['password']
+    @pg_pool = db['pool']
+  rescue Errno::ENOENT
+    @pg_host = ENV['PG_PORT_5432_TCP_ADDR']
+    @pg_port = ENV['PG_PORT_5432_TCP_PORT']
+    @pg_db   = ENV['PG_ENV_DB']
+    @pg_pool = ENV['PG_ENV_POOL']
+    @pg_user = ENV['PG_ENV_POSTGRES_USER']
+    @pg_pass = ENV['PG_ENV_POSTGRES_PASSWORD']
   end
 
   def default_conn_pool_size
@@ -84,7 +85,8 @@ module CellectEnv
     "postgresql://#{@pg_user}:#{@pg_pass}@#{@pg_host}:#{@pg_port}/#{@pg_db}?pool=#{connection_pool_value}"
   end
 
-  def docker_redis_url
-    "redis://#{ENV["REDIS_PORT_6379_TCP_ADDR"]}:#{ENV["REDIS_PORT_6379_TCP_PORT"]}/0"
+  def redis_url
+    ENV['ATTENTION_REDIS_URL'] ||
+    "redis://#{@redis_host}:#{@redis_port}/#{@redis_db}"
   end
 end
