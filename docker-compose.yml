@@ -1,5 +1,5 @@
 postgres:
-  image: postgres
+  image: postgres:9.4
   environment:
     - "POSTGRES_USER=panoptes"
     - "POSTGRES_PASSWORD=panoptes"
@@ -13,8 +13,8 @@ postgres:
 redis:
   image: redis
   command: redis-server --appendonly yes
-  ports:
-    - "6379:6379"
+  # ports:
+  #   - "6379:6379"
 
 cellect:
   build: .
@@ -22,14 +22,16 @@ cellect:
   volumes:
     - ./:/cellect_panoptes
   ports:
-    - "4000:4000"
+    - "4000:80"
   environment:
     - "RACK_ENV=development"
     - "DEBUG_CELLECT_START=true"
     - "PUMA_MAX_THREADS=16"
+    - "PUMA_PORT=80"
+    - "ATTENTION_REDIS_URL=redis://redis:6379/1"
     # use the database url to override the dd connection, e.g. to hit another server
     - "DATABASE_URL=postgresql://panoptes:panoptes@pg:5432/panoptes_development?pool=16"
     # - "PRELOAD_WORKFLOWS=1"
   links:
     - postgres:pg
-    - redis:redis
+    - redis
