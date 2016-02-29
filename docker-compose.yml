@@ -10,9 +10,11 @@ postgres:
   volumes:
     - ./tmp/:/tmp
 
-zookeeper:
-  image: zooniverse/zookeeper
-  command: /usr/share/zookeeper/bin/zkServer.sh start-foreground -c localhost:2888:3888 -i 1
+redis:
+  image: redis
+  command: redis-server --appendonly yes
+  ports:
+    - "6379:6379"
 
 cellect:
   build: .
@@ -30,4 +32,4 @@ cellect:
     # - "PRELOAD_WORKFLOWS=1"
   links:
     - postgres:pg
-    - zookeeper:zk
+    - redis:redis
