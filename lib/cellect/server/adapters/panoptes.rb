@@ -61,16 +61,17 @@ module Cellect
               .where(workflows: {id: workflow_id})
               .joins("LEFT OUTER JOIN subject_workflow_counts ON subject_workflow_counts.subject_id = set_member_subjects.subject_id")
               .where('subject_workflow_counts.retired_at IS NULL')
-              .select(:subject_id, :priority, :subject_set_id)
-              .distinct
+              .select(:id, :subject_id, :priority, :subject_set_id)
           end
 
-          subject_data.map do |row|
-            {
-              'id' => row.subject_id,
-              'priority' => 1 / (row.priority || 1).to_f,
-              'group_id' => row.subject_set_id
-            }
+          [].tap do |rows|
+            subject_data.find_each do |s|
+              rows << {
+                'id' => s.subject_id,
+                'priority' => 1 / (s.priority || 1).to_f,
+                'group_id' => s.subject_set_id
+              }
+            end
           end
         end
 
