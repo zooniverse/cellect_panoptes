@@ -41,14 +41,16 @@ module Cellect
               .where(id: names)
           end
 
-          workflow_data.map do |row|
-            {
-              'id' => row.id,
-              'name' => "#{row.id}",
-              'prioritized' => row.prioritized,
-              'pairwise' => row.pairwise,
-              'grouped' => row.grouped
-            }
+          [].tap do |rows|
+            workflow_data.find_each do |w|
+              rows << {
+                'id' => w.id,
+                'name' => "#{w.id}",
+                'prioritized' => w.prioritized,
+                'pairwise' => w.pairwise,
+                'grouped' => w.grouped
+              }
+            end
           end
         end
 
