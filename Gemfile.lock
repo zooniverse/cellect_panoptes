@@ -25,7 +25,7 @@ GEM
       ice_nine (~> 0.11.0)
       thread_safe (~> 0.3, >= 0.3.1)
     builder (3.2.2)
-    cellect-server (2.1.0)
+    cellect-server (2.1.1)
       attention (~> 0.0.4)
       celluloid (= 0.16.0)
       diff_set (~> 0.0.4)
@@ -97,7 +97,7 @@ GEM
       rack (>= 0.4)
     rack-mount (0.8.3)
       rack (>= 1.0.0)
-    redis (3.3.0)
+    redis (3.3.1)
     redis-namespace (1.5.2)
       redis (~> 3.0, >= 3.0.4)
     rice (2.1.0)
@@ -134,7 +134,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 4.2.5)
-  cellect-server (~> 2.1.0)
+  cellect-server (~> 2.1.1)
   connection_pool (~> 2.2.0)
   grape-activerecord (~> 1.0)
   newrelic_rpm (~> 3.14)
