@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-gem "puma", '~> 2.15.3'
+gem 'puma', '~> 3.4'
 gem "pg", '~> 0.18.4'
 gem "postgres_ext", '~> 2.4.1'
 gem "activerecord", '~> 4.2.5'
