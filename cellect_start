@@ -35,7 +35,7 @@ class CellectStart
     if max_threads.nil? || max_threads.to_s.empty?
       16
     else
-      max_threads.to_i / 2
+      max_threads.to_i
     end
   end
 
