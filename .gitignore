@@ -2,4 +2,5 @@
 newrelic.yml
 log/*.log
 tmp/*
-supervisord.*
+supervisord.log
+supervisord.pid
