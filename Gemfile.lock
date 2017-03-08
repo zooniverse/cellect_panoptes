@@ -1,3 +1,15 @@
+GIT
+  remote: git://github.com/zooniverse/cellect.git
+  revision: cc5a46f89445ffad6307b69ed6287b2ab80d3bfd
+  branch: master
+  specs:
+    cellect-server (2.1.1)
+      attention (~> 0.0.4)
+      celluloid (= 0.16.0)
+      diff_set (~> 0.0.4)
+      grape (~> 0.7)
+      http (~> 0.6)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -28,30 +40,24 @@ GEM
       ice_nine (~> 0.11.0)
       thread_safe (~> 0.3, >= 0.3.1)
     builder (3.2.2)
-    cellect-server (2.1.1)
-      attention (~> 0.0.4)
-      celluloid (= 0.16.0)
-      diff_set (~> 0.0.4)
-      grape (~> 0.7)
-      http (~> 0.6)
     celluloid (0.16.0)
       timers (~> 4.0.0)
     coderay (1.1.1)
     coercible (1.0.0)
       descendants_tracker (~> 0.0.1)
-    concurrent-ruby (1.0.2)
-    concurrent-ruby-ext (1.0.2)
-      concurrent-ruby (~> 1.0.2)
+    concurrent-ruby (1.0.5)
+    concurrent-ruby-ext (1.0.5)
+      concurrent-ruby (= 1.0.5)
     connection_pool (2.2.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.2.5)
     diff_set (0.0.4)
       rice (~> 2.1.0)
-    domain_name (0.5.20161129)
+    domain_name (0.5.20170223)
       unf (>= 0.0.5, < 1.0.0)
     equalizer (0.0.11)
-    grape (0.18.0)
+    grape (0.19.1)
       activesupport
       builder
       hashie (>= 2.1.0)
@@ -100,15 +106,15 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.8.1)
       slop (~> 3.4)
-    public_suffix (2.0.4)
-    puma (3.6.2)
+    public_suffix (2.0.5)
+    puma (3.7.1)
     rack (2.0.1)
     rack-accept (0.4.5)
       rack (>= 0.4)
-    redis (3.3.2)
-    redis-namespace (1.5.2)
+    redis (3.3.3)
+    redis-namespace (1.5.3)
       redis (~> 3.0, >= 3.0.4)
-    rice (2.1.0)
+    rice (2.1.1)
     rspec (3.5.0)
       rspec-core (~> 3.5.0)
       rspec-expectations (~> 3.5.0)
@@ -143,7 +149,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord (~> 4.2.5)
-  cellect-server (~> 2.1.1)
+  cellect-server!
   connection_pool (~> 2.2.0)
   newrelic_rpm (~> 3.14)
   oj (~> 2.13.1)
