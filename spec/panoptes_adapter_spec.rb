@@ -128,10 +128,13 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
   end
 
   describe '#load_data_for' do
-    it 'should subject data for the given workflow' do
+    it 'should load data for the given workflow' do
       subjects # not created yet
-      data = subject.load_data_for(loaded_workflow.id).group_by{ |h| h['id'] }
-
+      db_data = []
+      subject.load_data_for(loaded_workflow.id) do |hash|
+        db_data << hash
+      end
+      data = db_data.group_by{ |h| h['id'] }
       subjects.each do |panoptes_subject|
         cellect_subject = data[panoptes_subject.subject_id].first
         expect(cellect_subject).to be_present
