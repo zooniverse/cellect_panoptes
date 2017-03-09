@@ -55,7 +55,7 @@ module Cellect
         end
 
         def load_data_for(workflow_id)
-          subject_data = with_connection do
+          subject_data_scope = with_connection do
             PanoptesAssociation::SetMemberSubject
               .joins(:workflows)
               .where(workflows: {id: workflow_id})
@@ -64,14 +64,13 @@ module Cellect
               .select(:id, :subject_id, :priority, :subject_set_id)
           end
 
-          [].tap do |rows|
-            subject_data.find_each do |s|
-              rows << {
-                'id' => s.subject_id,
-                'priority' => 1 / (s.priority || 1).to_f,
-                'group_id' => s.subject_set_id
-              }
-            end
+          subject_data_scope.find_each do |s|
+            row = {
+              'id' => s.subject_id,
+              'priority' => 1 / (s.priority || 1).to_f,
+              'group_id' => s.subject_set_id
+            }
+            yield row
           end
         end
 

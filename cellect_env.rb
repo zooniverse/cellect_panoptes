@@ -19,7 +19,8 @@ module CellectEnv
       "ATTENTION_REDIS_URL" => redis_url,
       "DATABASE_URL" => database_url,
       "RACK_ENV" => @environment,
-      "PRELOAD_WORKFLOWS" => @preload_workflows
+      "PRELOAD_WORKFLOWS" => @preload_workflows,
+      "RELOAD_TIMEOUT" => ENV['RELOAD_TIMEOUT']
     }
   end
 

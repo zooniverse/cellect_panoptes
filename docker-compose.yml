@@ -29,6 +29,7 @@ cellect:
     - "PUMA_MAX_THREADS=16"
     - "PUMA_PORT=80"
     - "ATTENTION_REDIS_URL=redis://redis:6379/1"
+    - "RELOAD_TIMEOUT=60"
     # use the database url to override the dd connection, e.g. to hit another server
     - "DATABASE_URL=postgresql://panoptes:panoptes@pg:5432/panoptes_development?pool=16"
     # - "PRELOAD_WORKFLOWS=1"
