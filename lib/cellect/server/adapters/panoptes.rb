@@ -35,42 +35,42 @@ module Cellect
         end
 
         def workflow_list(*names)
-          workflow_data = with_connection do
-            PanoptesAssociation::Workflow
+          with_connection do
+            workflow_data = PanoptesAssociation::Workflow
               .select(:id, :prioritized, :pairwise, :grouped)
               .where(id: names)
-          end
 
-          [].tap do |rows|
-            workflow_data.find_each do |w|
-              rows << {
-                'id' => w.id,
-                'name' => "#{w.id}",
-                'prioritized' => w.prioritized,
-                'pairwise' => w.pairwise,
-                'grouped' => w.grouped
-              }
+            [].tap do |rows|
+              workflow_data.find_each do |w|
+                rows << {
+                  'id' => w.id,
+                  'name' => "#{w.id}",
+                  'prioritized' => w.prioritized,
+                  'pairwise' => w.pairwise,
+                  'grouped' => w.grouped
+                }
+              end
             end
           end
         end
 
         def load_data_for(workflow_id)
-          subject_data_scope = with_connection do
-            PanoptesAssociation::SetMemberSubject
+          with_connection do
+            subject_data_scope = PanoptesAssociation::SetMemberSubject
               .joins(:workflows)
               .where(workflows: {id: workflow_id})
               .joins("LEFT OUTER JOIN subject_workflow_counts ON subject_workflow_counts.subject_id = set_member_subjects.subject_id")
               .where('subject_workflow_counts.retired_at IS NULL')
               .select(:id, :subject_id, :priority, :subject_set_id)
-          end
 
-          subject_data_scope.find_each do |s|
-            row = {
-              'id' => s.subject_id,
-              'priority' => 1 / (s.priority || 1).to_f,
-              'group_id' => s.subject_set_id
-            }
-            yield row
+            subject_data_scope.find_each do |s|
+              row = {
+                'id' => s.subject_id,
+                'priority' => 1 / (s.priority || 1).to_f,
+                'group_id' => s.subject_set_id
+              }
+              yield row
+            end
           end
         end
 
