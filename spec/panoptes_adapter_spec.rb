@@ -12,6 +12,7 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
   let(:set_workflow_join_class) { Cellect::Server::Adapters::PanoptesAssociation::SubjectSetsWorkflow}
   let(:subject_class) { Cellect::Server::Adapters::PanoptesAssociation::SetMemberSubject }
   let(:uss_class) { Cellect::Server::Adapters::PanoptesAssociation::UserSeenSubject }
+  let(:swc_class) { Cellect::Server::Adapters::PanoptesAssociation::SubjectWorkflowCount }
 
   let(:workflows) do
     w1 = workflow_class.create! do |w|
@@ -128,8 +129,12 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
   end
 
   describe '#load_data_for' do
-    it 'should load data for the given workflow' do
-      subjects # not created yet
+    it 'should load data for the given workflow', :focus do
+      # retire 1 subject for the non-loaded workflows
+      non_loaded_workflow = (worklfows - [loaded_workflow]).first
+      retired_in_other_workflow_subject = subjects.sample
+      swc_class.create!(workflow: non_loaded_workflow, subject: retired_in_other_workflow_subject, retired_at: Time.now)
+
       db_data = []
       subject.load_data_for(loaded_workflow.id) do |hash|
         db_data << hash
