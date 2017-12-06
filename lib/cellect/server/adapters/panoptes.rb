@@ -64,7 +64,11 @@ module Cellect
             subject_data_scope = PanoptesAssociation::SetMemberSubject
               .joins(:workflows)
               .where(workflows: {id: workflow_id})
-              .joins("LEFT OUTER JOIN subject_workflow_counts ON subject_workflow_counts.subject_id = set_member_subjects.subject_id")
+              .joins(
+                "LEFT OUTER JOIN subject_workflow_counts " \
+                "ON subject_workflow_counts.subject_id = set_member_subjects.subject_id"
+              )
+              .where('subject_workflow_counts.workflow_id': workflow_id)
               .where('subject_workflow_counts.retired_at IS NULL')
               .select(:id, :subject_id, :priority, :subject_set_id)
 
