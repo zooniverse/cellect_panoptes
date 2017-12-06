@@ -27,6 +27,11 @@ module Cellect
 
         class UserSeenSubject < ActiveRecord::Base
         end
+
+        class SubjectWorkflowCount < ActiveRecord::Base
+          belongs_to :subject
+          belongs_to :workflow
+        end
       end
 
       class Panoptes < Default
