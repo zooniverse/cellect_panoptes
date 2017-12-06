@@ -165,10 +165,10 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
         )
       end
 
-      it "should not load the subject", :focus do
+      it "should not load the subject" do
         retired_loaded_workflow_swc
         retired_non_loaded_workflow_swc
-        binding.pry
+        expect(loaded_data).not_to be_empty
         expect(loaded_data[retired_subject_id]).to be_nil
       end
     end
