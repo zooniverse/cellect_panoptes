@@ -27,6 +27,17 @@ module Cellect
 
         class UserSeenSubject < ActiveRecord::Base
         end
+
+        class SubjectWorkflowCount < ActiveRecord::Base
+          belongs_to :subject
+          belongs_to :workflow
+
+          def self.sanitized_workflow_join(workflow_id)
+            sanitize_sql_for_conditions(
+              ['subject_workflow_counts.workflow_id = ?', workflow_id]
+            )
+          end
+        end
       end
 
       class Panoptes < Default
@@ -59,7 +70,11 @@ module Cellect
             subject_data_scope = PanoptesAssociation::SetMemberSubject
               .joins(:workflows)
               .where(workflows: {id: workflow_id})
-              .joins("LEFT OUTER JOIN subject_workflow_counts ON subject_workflow_counts.subject_id = set_member_subjects.subject_id")
+              .joins(
+                "LEFT OUTER JOIN subject_workflow_counts " \
+                "ON subject_workflow_counts.subject_id = set_member_subjects.subject_id " \
+                "AND #{PanoptesAssociation::SubjectWorkflowCount.sanitized_workflow_join(workflow_id)}"
+              )
               .where('subject_workflow_counts.retired_at IS NULL')
               .select(:id, :subject_id, :priority, :subject_set_id)
 
