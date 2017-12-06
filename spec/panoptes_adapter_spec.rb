@@ -130,23 +130,46 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
   end
 
   describe '#load_data_for' do
-    it 'should load data for the given workflow', :focus do
-      # retire 1 subject for the non-loaded workflows
-      non_loaded_workflow = (worklfows - [loaded_workflow]).first
-      retired_in_other_workflow_subject = subjects.sample
-      swc_class.create!(workflow: non_loaded_workflow, subject: retired_in_other_workflow_subject, retired_at: Time.now)
-
+    let(:loaded_data) do
       db_data = []
       subject.load_data_for(loaded_workflow.id) do |hash|
         db_data << hash
       end
-      data = db_data.group_by{ |h| h['id'] }
+      db_data.group_by{ |h| h['id'] }
+    end
+
+    it 'should load data for the given workflow' do
       subjects.each do |panoptes_subject|
-        cellect_subject = data[panoptes_subject.subject_id].first
+        cellect_subject = loaded_data[panoptes_subject.subject_id].first
         expect(cellect_subject).to be_present
         expect(cellect_subject['id']).to eql panoptes_subject.subject_id
         expect(cellect_subject['group_id']).to eql panoptes_subject.subject_set_id
         expect(cellect_subject['priority']).to be_within(0.1).of 1 / panoptes_subject.priority.to_f
+      end
+    end
+
+    context "when a subject is retired for the loaded workflow but not another" do
+      let(:non_loaded_workflow) { (workflows - [loaded_workflow]).first }
+      let(:retired_subject_id) { subjects.sample.subject_id }
+      let(:retired_loaded_workflow_swc) do
+        swc_class.create(
+          workflow_id: loaded_workflow.id,
+          subject_id: retired_subject_id,
+          retired_at: Time.now
+        )
+      end
+      let(:retired_non_loaded_workflow_swc) do
+        swc_class.create!(
+          workflow_id: non_loaded_workflow.id,
+          subject_id: retired_subject_id
+        )
+      end
+
+      it "should not load the subject", :focus do
+        retired_loaded_workflow_swc
+        retired_non_loaded_workflow_swc
+        binding.pry
+        expect(loaded_data[retired_subject_id]).to be_nil
       end
     end
   end
