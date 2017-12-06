@@ -66,6 +66,7 @@ RSpec.describe Cellect::Server::Adapters::Panoptes do
     set_class.destroy_all
     subject_class.destroy_all
     workflow_class.destroy_all
+    swc_class.destroy_all
   end
 
   describe "ActiveRecord connection" do
