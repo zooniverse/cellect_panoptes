@@ -101,7 +101,7 @@ GEM
       method_source (~> 0.8.1)
       slop (~> 3.4)
     public_suffix (3.0.1)
-    puma (3.7.1)
+    puma (3.11.4)
     rack (2.0.3)
     rack-accept (0.4.5)
       rack (>= 0.4)
@@ -150,7 +150,7 @@ DEPENDENCIES
   pg (~> 0.18.4)
   postgres_ext (~> 2.4.1)
   pry
-  puma (~> 3.4)
+  puma (~> 3.11)
   rspec
 
 BUNDLED WITH
