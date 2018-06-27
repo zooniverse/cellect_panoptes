@@ -42,7 +42,7 @@ GEM
     concurrent-ruby (1.0.5)
     concurrent-ruby-ext (1.0.5)
       concurrent-ruby (= 1.0.5)
-    connection_pool (2.2.1)
+    connection_pool (2.2.2)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.2.5)
@@ -141,7 +141,7 @@ PLATFORMS
 DEPENDENCIES
   activerecord (~> 4.2.5)
   cellect-server (~> 3.0.1)
-  connection_pool (~> 2.2.0)
+  connection_pool (~> 2.2.2)
   newrelic_rpm (~> 5.2)
   oj (~> 2.13.1)
   otr-activerecord (~> 1.2)
