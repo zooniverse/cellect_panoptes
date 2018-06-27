@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 gem 'puma', '~> 3.11'
-gem "pg", '~> 0.18.4'
+gem "pg", '~> 1.0.0'
 gem "postgres_ext", '~> 2.4.1'
 gem "activerecord", '~> 4.2.5'
 gem "connection_pool", '~> 2.2.2'
