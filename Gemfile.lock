@@ -90,7 +90,7 @@ GEM
     otr-activerecord (1.2.0)
       activerecord (>= 4.0, < 5.1)
       hashie-forbidden_attributes (~> 0.1)
-    pg (0.18.4)
+    pg (1.1.2)
     pg_array_parser (0.0.9)
     postgres_ext (2.4.1)
       activerecord (>= 4.0.0)
@@ -145,7 +145,7 @@ DEPENDENCIES
   newrelic_rpm (~> 5.2)
   oj (~> 2.13.1)
   otr-activerecord (~> 1.2)
-  pg (~> 0.18.4)
+  pg (~> 1.1.2)
   postgres_ext (~> 2.4.1)
   pry
   puma (~> 3.11)
