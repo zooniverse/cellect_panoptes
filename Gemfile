@@ -7,7 +7,7 @@ gem "activerecord", '~> 4.2.5'
 gem "connection_pool", '~> 2.2.2'
 gem "oj", '~> 2.13.1'
 gem "cellect-server", '~> 3.0.1'
-gem 'newrelic_rpm', '~> 5.2'
+gem 'newrelic_rpm', '~> 6.0'
 gem "otr-activerecord" ,'~> 1.2'
 
 group :development, :test do
