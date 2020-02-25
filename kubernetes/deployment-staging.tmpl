@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cellect-staging-app
+  labels:
+    app: cellect-staging-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cellect-staging-app
+  template:
+    metadata:
+      labels:
+        app: cellect-staging-app
+    spec:
+      containers:
+        - name: cellect-staging-app
+          image: zooniverse/cellect-panoptes:__IMAGE_TAG__
+          env:
+            - name: RACK_ENV
+              value: staging
+            - name: DEBUG_CELLECT_START
+              value: false
+          ports:
+            - containerPort: 80
+          volumeMounts:
+          - name: cellect-staging-config
+            mountPath: "/production_config"
+            readOnly: true
+      volumes:
+      - name: cellect-staging-config
+        secret:
+          secretName: cellect-staging-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cellect-staging-app
+spec:
+  selector:
+    app: cellect-staging-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cellect-staging-redis
+  labels:
+    app: cellect-staging-redis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: cellect-staging-redis
+  template:
+    metadata:
+      labels:
+        app: cellect-staging-redis
+    spec:
+      containers:
+        - name: cellect-staging-redis
+          image: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cellect-staging-redis
+spec:
+  selector:
+    app: cellect-staging-redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: NodePort

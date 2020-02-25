@@ -10,7 +10,7 @@ ENV LC_ALL en_US.UTF-8
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends autoconf automake \
-            libboost-all-dev libffi-dev git-core supervisor curl libpq-dev && \
+            libboost-all-dev libffi-dev git-core curl libpq-dev && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
@@ -19,11 +19,10 @@ ADD ./Gemfile.lock /cellect_panoptes/
 
 RUN bundle install
 
-ADD supervisord.conf /etc/supervisor/conf.d/cellect.conf
 ADD ./ /cellect_panoptes
 
 RUN chmod +x /cellect_panoptes/cellect_start
 
 EXPOSE 80
 
-ENTRYPOINT [ "/usr/bin/supervisord" ]
+CMD [ "bundle", "exec", "./cellect_start" ]
