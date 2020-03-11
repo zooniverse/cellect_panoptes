@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cellect-production-app
+  labels:
+    app: cellect-production-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cellect-production-app
+  template:
+    metadata:
+      labels:
+        app: cellect-production-app
+    spec:
+      containers:
+        - name: cellect-production-app
+          image: zooniverse/cellect-panoptes:__IMAGE_TAG__
+          env:
+            - name: RACK_ENV
+              value: "production"
+            - name: DEBUG_CELLECT_START
+              value: "false"
+            - name: PUMA_PORT
+              value: "80"
+          ports:
+            - containerPort: 80
+          volumeMounts:
+          - name: cellect-production-config
+            mountPath: "/production_config"
+            readOnly: true
+      volumes:
+      - name: cellect-production-config
+        secret:
+          secretName: cellect-production-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cellect-production-app
+spec:
+  selector:
+    app: cellect-production-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cellect-production-redis
+  labels:
+    app: cellect-production-redis
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: cellect-production-redis
+  template:
+    metadata:
+      labels:
+        app: cellect-production-redis
+    spec:
+      containers:
+        - name: cellect-production-redis
+          image: redis
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cellect-production-redis
+spec:
+  selector:
+    app: cellect-production-redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: NodePort
