@@ -81,6 +81,15 @@ spec:
              limits:
                memory: "100Mi"
                cpu: "500m"
+          volumeMounts:
+            - name: cellect-staging-redis-data
+              mountPath: "/data"
+      volumes:
+        - name: cellect-staging-redis-data
+          hostPath:
+            # directory location on host node temp disk
+            path: /mnt/cellect-staging-redis-data
+            type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
