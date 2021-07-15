@@ -9,7 +9,7 @@ gem "oj", '~> 2.13.1'
 gem "cellect-server", '~> 3.0.1'
 gem 'newrelic_rpm', '~> 5.2'
 gem "otr-activerecord" ,'~> 1.2'
-gem 'rack', '~> 2.0.9'
+gem 'rack', '~> 2.1.4'
 
 group :development, :test do
   gem "pry"
