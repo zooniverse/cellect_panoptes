@@ -10,7 +10,7 @@ ENV CONFIGURE_OPTS --disable-install-rdoc --enable-shared
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-  autoconf automake build-essential \
+      autoconf automake build-essential \
       libboost-all-dev libffi-dev \
       git-core libpq-dev && \
     apt-get autoremove && \
