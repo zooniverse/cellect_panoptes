@@ -9,7 +9,7 @@ gem "oj", '~> 2.18'
 gem "cellect-server", git: 'https://github.com/zooniverse/Cellect.git', branch: 'relax-grape-constraint', ref: 'ed1f1fd0788205aca8ffaddc360b60d89ad80482'
 gem 'newrelic_rpm', '~> 5.2'
 gem "otr-activerecord" ,'~> 1.2'
-gem 'rack', '~> 2.1'
+gem 'rack', '~> 2.2'
 gem 'grape', '~> 1'
 
 group :development, :test do
